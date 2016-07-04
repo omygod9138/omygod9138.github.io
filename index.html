@@ -24,11 +24,11 @@
 	<script src="jquery-1.12.4.min.js"></script>
 	<script>
 		function loop(){
-			$('div#caption').css({'left': '1920px'}).animate({"left": -$('div#caption').width()}, 20000, "linear", function(){loop()});  
+			$('div#caption').css({'left': '1920px'}).animate({"left": -$('div#caption').width()}, 60000, "linear", function(){loop()});  
 		}
 		$(document).ready(function(){
 			
-			$('div#caption').animate({"left": -$(this).width()}, 20000, "linear", function(){loop()});  
+			$('div#caption').animate({"left": -$(this).width()}, 60000, "linear", function(){loop()});  
 		})
 	</script>
 </head>
