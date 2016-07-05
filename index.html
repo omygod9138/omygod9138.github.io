@@ -52,7 +52,7 @@
 			$('div#caption').css({'left': '1920px'}).animate({"left": -$('div#caption').width()}, 60000, "linear", function(){loop()});  
 		}
 		function jsonp_test(){
-			$.getJSON('http://wowauction.rf.gd/see.php??callback=?','firstname=Jeff',function(res){
+			$.getJSON('https://wowauction.rf.gd/see.php??callback=?','firstname=Jeff',function(res){
 			    alert('Your name is '+res.fullname);
 			});
 		}
@@ -75,7 +75,7 @@
 	</script>
 </head>
 <body>
-	<button style="position:fixed;" onclick='jsonp_test()'>test</button>
+	<button style="position:fixed;z-index:999999999;" onclick='jsonp_test()'>test</button>
 <div id="caption">
 	<div id="section_1">
 	<a name="section_1"></a>
