@@ -48,10 +48,6 @@
 	</style>
 	<script src="jquery-1.12.4.min.js"></script>
 	<script>
-		function loop(){
-			$('div#caption').css({'left': '1920px'}).animate({"left": -$('div#caption').width()}, 60000, "linear", function(){loop()});  
-		}
-	
 		$(document).ready(function(){
 			var sect = 1
 			
@@ -62,11 +58,11 @@
 				 }, 100, 'linear', function(){
 					$('#section_'+sect).fadeIn('slow');
 				 });
-				//location.hash = 'section_'+sect;
+			
 				sect++;
 				sect = sect > 5 ? 1 : sect;
 			}, 3000);
-			//$('div#caption').animate({"left": -$(this).width()}, 60000, "linear", function(){loop()});  
+		
 		})
 	</script>
 </head>
@@ -80,7 +76,7 @@
 	<div id="section_2">
 	<a name="section_2"></a>
 	<div style="font-size:4cm;"><span style="color:yellow;">2016</span>年<span style="color:yellow;">07</span>月<span style="color:yellow;">04</span>日<span style="color:yellow;">13</span>時</div>
-	<div style="font-size:3cm;">懸浮微粒濃度為 <span style="color:yellow;">100.1</span> µg/m3</div> 
+	<div style="font-size:3cm;">懸浮微粒濃度為 <span style="color:yellow;">100.1</span> µg/m<sup>3</sup></div> 
 	</div>
 	<div id="section_3">
 	<a name="section_3"></a>
