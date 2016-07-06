@@ -1,10 +1,8 @@
 <?php
 $file = file_get_contents('caption.txt');
 $str = array_filter(explode(PHP_EOL, $file));
-if(isset($_GET['displayMode']) && trim($_GET['displayMode']) === 'caption'){
-	
-	
-}else{
+$display = $_GET['captionMode'] ? $_GET['captionMode'] : null;
+if(!$display){
 ?>
 <!DOCTYPE html>
 <html>
@@ -22,28 +20,24 @@ if(isset($_GET['displayMode']) && trim($_GET['displayMode']) === 'caption'){
 			white-space: nowrap;
 		}
 		#caption{
-			
 			width:100%;
 			position:absolute;
 			text-align:center;
 			letter-spacing: 5px;
 			line-height: 1;
 			top:0px;
-			
 		}
 		.sections{
 			font-size:4cm;
 			height: 1080px;
-			display:hidden;
+		
 		}
 		#section_1{
 			font-size:4cm;
 			height: 1080px;
-			
 		}
 		img{
 			vertical-align: middle;
-			
 		}
 	</style>
 	<script src="jquery-1.12.4.min.js"></script>
@@ -51,19 +45,21 @@ if(isset($_GET['displayMode']) && trim($_GET['displayMode']) === 'caption'){
 		
 		$(document).ready(function(){
 			var sect = 1
-			/*
+			var max_sect = document.querySelectorAll("#caption > div").length;
+			console.log(max_sect);
 			setInterval(function(){
-				$('#section_'+sect).fadeOut();
-				 $('html, body').animate({
+				//$('#section_'+sect).fadeOut();
+				$('html, body').animate({
 				   'scrollTop':   $('#section_'+sect).offset().top
-				 }, 100, 'linear', function(){
-					$('#section_'+sect).fadeIn(3000);
+				 }, 1, 'linear', function(){
+					$('#section_'+sect).fadeIn(1000);
+					$('#section_'+(sect - 1)).fadeOut();
 				 });
 				//location.hash = 'section_'+sect;
 				sect++;
-				sect = sect > 5 ? 1 : sect;
+				sect = sect > max_sect ? 1 : sect;
 			}, 3000);
-			*/
+			
 		})
 	</script>
 </head>
@@ -96,11 +92,14 @@ foreach($str AS $section){
 			$section[0] = sprintf($section[0], $airCondition);
 		break;
 	}
-	echo "<div id='section_".$sectionCount."' class='sections'>
-			<a name='section_".$sectionCount."'></a>
-			<div>".$section[0]."</div>
-			<div>".$section[1]."</div>
-			</div>";
+	$div =  "<div id='section_".$sectionCount."' class='sections'>
+			<a name='section_".$sectionCount."'></a>";
+	foreach($section AS $paragraph){		
+		$div .=	"<div>".$paragraph."</div>";
+	}
+	
+	echo $div."</div>";
+	
 	$sectionCount++;
 	
 }
