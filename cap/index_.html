@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>花蓮縣環境保護局</title>
+	<!--<link rel="stylesheet" href="normalize.css" />-->
+	<style>
+		body{
+			width:1920px;
+			height:1080px;
+			background-color:black;
+			color:white;
+			overflow:hidden;
+			white-space: nowrap;
+		}
+		#caption{
+			
+			width:100%;
+			position:absolute;
+			text-align:center;
+			/*left: 1920px;*/
+			/*top:-50px;*/
+		}
+		#section_1{
+			font-size:4cm;
+			height: 1080px;
+			
+		}
+		#section_2{
+			height: 1080px;
+			display:hidden;
+		}
+		#section_3{
+			font-size:4cm;
+			height: 1080px;
+			display:hidden;
+		}
+		#section_4{
+			font-size:4cm;
+			height: 1080px;
+			display:hidden;
+		}
+		#section_5{
+			font-size:4cm;
+			height: 1080px;
+			display:hidden;
+		}
+	</style>
+	<script src="jquery-1.12.4.min.js"></script>
+	<script>
+		
+		$(document).ready(function(){
+			var sect = 1
+			
+			setInterval(function(){
+				$('#section_'+sect).fadeOut();
+				 $('html, body').animate({
+				   'scrollTop':   $('#section_'+sect).offset().top
+				 }, 100, 'linear', function(){
+					$('#section_'+sect).fadeIn(3000);
+				 });
+				//location.hash = 'section_'+sect;
+				sect++;
+				sect = sect > 5 ? 1 : sect;
+			}, 60000);
+			
+		})
+	</script>
+</head>
+<body>
+<div id="caption">
+	<div id="section_1">
+	<a name="section_1"></a>
+	<div>花蓮縣環境保護局</div>
+	<div>河川揚塵監測計畫</div>
+	</div>
+	<div id="section_2">
+	<a name="section_2"></a>
+	<div style="font-size:4cm;"><span style="color:yellow;">2016</span>年<span style="color:yellow;">07</span>月<span style="color:yellow;">04</span>日<span style="color:yellow;">13</span>時</div>
+	<div style="font-size:3cm;">懸浮微粒濃度為 <span style="color:yellow;">100.1</span> µg/m<sup>3</sup></div> 
+	</div>
+	<div id="section_3">
+	<a name="section_3"></a>
+	<div>空氣品質<span style="color:yellow;">良好</span></div>
+	<div>揚塵防制不能少</div>
+	</div>
+	<div id="section_4">
+	<a name="section_4"></a>
+	<div>生活環境更美好</div>
+	<div>花蓮縣環境保護局關心您</div>
+	</div>
+	<div id="section_5">
+	<a name="section_5"></a>
+	<div>威陞環境科技股份有限公司</div>
+	<div><img src="logo.jpg">河川揚塵監控系統</div>
+	</div>
+</div>
+</body>
+</html>
