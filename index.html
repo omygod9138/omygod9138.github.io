@@ -37,6 +37,30 @@
 	<script>
 		$(document).ready(function(){
 			var sect = 1
+			var cur_sect;
+			var max_sect = document.querySelectorAll("#caption > div").length;
+			console.log(max_sect);
+			 $('body').bind('mousewheel', function(e){
+				if(e.originalEvent.wheelDelta /120 > 0) {
+					
+					sect--;
+					sect = sect < 1 ? max_sect : sect;
+					console.log('scrolling up !', sect);
+				}
+				else{
+					
+					sect++;
+					sect = sect > max_sect ? 1 : sect;
+					console.log('scrolling down !', sect);
+				}
+				
+				
+				$('html, body').animate({
+					   'scrollTop':   $('#section_'+sect).offset().top
+					 }, 1, 'linear', function(){
+						$('#section_'+sect).fadeIn(1000);
+						
+				});
 			/*
 			setInterval(function(){
 				$('#section_'+sect).fadeOut();
