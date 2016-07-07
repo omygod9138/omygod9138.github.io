@@ -24,20 +24,19 @@ if(!$display){
 			position:absolute;
 			text-align:center;
 			letter-spacing: 5px;
-			line-height: 1;
-			top:0px;
+			line-height: 2;
+			font-size:114px;
 		}
 		.sections{
-			font-size:4cm;
 			height: 1080px;
-		
+			padding-top: 192px;
 		}
-		#section_1{
-			font-size:4cm;
-			height: 1080px;
-		}
+	
 		img{
 			vertical-align: middle;
+			max-height: 146px;
+			max-width: 203px;
+			margin-top: -36px;
 		}
 	</style>
 	<script src="jquery-1.12.4.min.js"></script>
@@ -45,8 +44,33 @@ if(!$display){
 		
 		$(document).ready(function(){
 			var sect = 1
+			var cur_sect;
 			var max_sect = document.querySelectorAll("#caption > div").length;
 			console.log(max_sect);
+			 $('body').bind('mousewheel', function(e){
+				if(e.originalEvent.wheelDelta /120 > 0) {
+					
+					sect--;
+					sect = sect < 1 ? max_sect : sect;
+					console.log('scrolling up !', sect);
+				}
+				else{
+					
+					sect++;
+					sect = sect > max_sect ? 1 : sect;
+					console.log('scrolling down !', sect);
+				}
+				
+				
+				$('html, body').animate({
+					   'scrollTop':   $('#section_'+sect).offset().top
+					 }, 1, 'linear', function(){
+						$('#section_'+sect).fadeIn(1000);
+						
+				});
+				
+			});
+			/*
 			setInterval(function(){
 				//$('#section_'+sect).fadeOut();
 				$('html, body').animate({
@@ -59,7 +83,7 @@ if(!$display){
 				sect++;
 				sect = sect > max_sect ? 1 : sect;
 			}, 3000);
-			
+			*/
 		})
 	</script>
 </head>
@@ -68,40 +92,43 @@ if(!$display){
 <?php
 $sectionCount = 1;
 $db_value = 100.11; // value taken from database
+
+if($db_value > 100){
+	$condition = '不良';
+}elseif($db_value < 100 && $db_value > 59){
+	$condition = '普通';
+}elseif($db_value <= 59){
+	$condition = '良好';
+}
+$value = '<span style="color:yellow;">'.$db_value.'</span>';
+$airCondition = '<span style="color:yellow;">'.$condition.'</span>';
 foreach($str AS $section){
-	$section = explode(',', $section);
-	switch ($sectionCount){
-		case 2:
-			$year = date('Y');
-			$mth = date('m');
-			$day = date('d');
-			$hr = date('H');
-			$value = '<span style="color:yellow;">'.$db_value.'</span>';
-			$section[0] = sprintf($section[0], $year, $mth, $day, $hr);
-			$section[1] = sprintf($section[1], $value);
-		break;
-		case 3:
-			if($db_value > 100){
-				$condition = '不良';
-			}elseif($db_value < 100 && $db_value > 59){
-				$condition = '普通';
-			}elseif($db_value <= 59){
-				$condition = '良好';
-			}
-			$airCondition = '<span style="color:yellow;">'.$condition.'</span>';
-			$section[0] = sprintf($section[0], $airCondition);
-		break;
-	}
+	$section = explode('|', $section);
 	$div =  "<div id='section_".$sectionCount."' class='sections'>
 			<a name='section_".$sectionCount."'></a>";
-	foreach($section AS $paragraph){		
+	foreach($section AS $paragraph){	
+		if(preg_match("/%s年%s月%s日%s時/", $paragraph, $matches) === 1){
+			$year = '<span style="color:yellow;">'.date('Y').'</span>';
+			$mth = '<span style="color:yellow;">'.date('m').'</span>';
+			$day = '<span style="color:yellow;">'.date('d').'</span>';
+			$hr = '<span style="color:yellow;">'.date('H').'</span>';
+			$paragraph = sprintf($paragraph, $year, $mth, $day, $hr);
+		}
+		
+		if(preg_match("/µg/", $paragraph, $matches) === 1){
+			$paragraph = sprintf($paragraph, $value);
+		}
+		
+		if(preg_match("/空氣品質/", $paragraph, $matches) === 1){
+			$paragraph = sprintf($paragraph, $airCondition);
+		}
+			
+
+		
 		$div .=	"<div>".$paragraph."</div>";
 	}
-	
 	echo $div."</div>";
-	
 	$sectionCount++;
-	
 }
 ?>
 <!--
