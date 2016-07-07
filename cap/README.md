@@ -1,7 +1,7 @@
-# omygod9138.github.io
-for testing
+# 字幕機測試用
+測試用
 
-Description:
+說明:
 
 caption.txt 存取要顯示在字幕機/螢幕上的文字
  
