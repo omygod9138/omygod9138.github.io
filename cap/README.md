@@ -3,8 +3,11 @@
 
 說明:
 index.html  展示用(github 只支援HTML)
+
 index.php   實際用檔
+
 logo.jpg    SGS的圖檔
+
 caption.txt 存取要顯示在字幕機/螢幕上的文字
  
   說明:
