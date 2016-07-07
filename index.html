@@ -30,7 +30,9 @@
 		<link rel="stylesheet" href="css/theme.css">
 		<link rel="stylesheet" href="css/theme-elements.css">
 		<link rel="stylesheet" href="css/theme-animate.css">
-
+		
+		<!-- urlive -->
+		<link href="css/jquery.urlive.css" rel="stylesheet" />
 		<!-- Current Page Styles -->
 		<link rel="stylesheet" href="css/theme-blog.css" />
 
@@ -119,7 +121,9 @@
 									<div class="owl-carousel" data-plugin-options='{"items": 1, "transitionStyle": "fade", "autoHeight": true}'>
 										<div>
 											<div class="post-image">
-												<img class="img-responsive img-rounded" src="img/blog/blog-image-1.jpg" alt="">
+												<div class="urlive-container" id="post-image-1">
+												    <span class="loading">Loading...</span>
+												</div>
 											</div>
 										</div>
 										<div>
@@ -327,13 +331,19 @@
 		<script src="vendor/jquery.stellar.js"></script>
 		<script src="vendor/jquery.validate.js"></script>
 		<script src="vendor/isotope/jquery.isotope.js"></script>
-
+	
 		<!-- Theme Initializer -->
 		<script src="js/theme.js"></script>
 
 		<!-- Custom JS -->
 		<script src="js/custom.js"></script>
-
+		<script src="js/jquery.urlive.js"></script>
+		<script>
+			$(document).ready(function(){
+				$('#post-image-1').urlive({container: '.urlive-container'});
+				
+			})
+		</script>
 		<!-- Google Analytics: Change UA-XXXXX-X to be your site's ID. Go to http://www.google.com/analytics/ for more information.
 		<script type="text/javascript">
 
