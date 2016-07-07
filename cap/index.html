@@ -14,105 +14,83 @@
 			white-space: nowrap;
 		}
 		#caption{
-			
 			width:100%;
 			position:absolute;
 			text-align:center;
-			/*left: 1920px;*/
-			/*top:-50px;*/
+			letter-spacing: 5px;
+			line-height: 2;
+			font-size:114px;
 		}
-		#section_1{
-			font-size:4cm;
-			height: 1080px;
+		.sections{
 			
-		}
-		#section_2{
 			height: 1080px;
-			display:hidden;
+			padding-top: 192px;
 		}
-		#section_3{
-			font-size:4cm;
-			height: 1080px;
-			display:hidden;
-		}
-		#section_4{
-			font-size:4cm;
-			height: 1080px;
-			display:hidden;
-		}
-		#section_5{
-			font-size:4cm;
-			height: 1080px;
-			display:hidden;
+		img{
+			vertical-align: middle;
+			max-height: 146px;
+			max-width: 203px;
+			margin-top: -36px;
 		}
 	</style>
 	<script src="jquery-1.12.4.min.js"></script>
 	<script>
-		function refresh(){
-			var today = new Date();
-			var currentMin = today.getMinutes() * 60 + today.getSeconds();
-			var currentSec = today.getSeconds();
-			console.log(currentMin, currentSec);
-			if(currentMin > 300){
-				var timeLeft = ((3600 - currentMin) + 300) * 1000; 
-				console.log('wait for next hour', timeLeft);
-			}else if(currentMin < 300){
-				var timeLeft = (300 - currentMin) * 1000;
-				console.log('near 5 min', timeLeft);
-			}
-				setTimeout(function(){location.reload();}, timeLeft);
-				setInterval(function(){console.log(new Date().getMinutes() * 60 + new Date().getSeconds())}, 1000);
-		}
 		$(document).ready(function(){
-			console.log('refreshed again');
-			refresh();
-			
-			/*
 			var sect = 1
+			var cur_sect;
+			var max_sect = document.querySelectorAll("#caption > div").length;
+			console.log(max_sect);
+			 $('body').bind('mousewheel', function(e){
+				if(e.originalEvent.wheelDelta /120 > 0) {
+					
+					sect--;
+					sect = sect < 1 ? max_sect : sect;
+					console.log('scrolling up !', sect);
+				}
+				else{
+					
+					sect++;
+					sect = sect > max_sect ? 1 : sect;
+					console.log('scrolling down !', sect);
+				}
+				
+				
+				$('html, body').animate({
+					   'scrollTop':   $('#section_'+sect).offset().top
+					 }, 1, 'linear', function(){
+						$('#section_'+sect).fadeIn(1000);
+						
+				});
+			 });
+			/*
 			setInterval(function(){
 				$('#section_'+sect).fadeOut();
 				 $('html, body').animate({
 				   'scrollTop':   $('#section_'+sect).offset().top
 				 }, 100, 'linear', function(){
-					$('#section_'+sect).fadeIn(3000);
+					$('#section_'+sect).fadeIn('slow');
 				 });
-				//location.hash = 'section_'+sect;
+			
 				sect++;
 				sect = sect > 5 ? 1 : sect;
-			}, 60000);
+			}, 3000);
 			*/
 		})
 	</script>
 </head>
 <body>
-<!--
 <div id="caption">
-	<div id="section_1">
+<div id="section_1" class="sections">
 	<a name="section_1"></a>
-	<div>花蓮縣環境保護局</div>
-	<div>河川揚塵監測計畫</div>
-	</div>
-	<div id="section_2">
+	<div>花蓮縣環境保護局河川揚塵監測計畫</div><div><span style="color:yellow;">2016</span>年<span style="color:yellow;">07</span>月<span style="color:yellow;">07</span>日<span style="color:yellow;">09</span>時</div></div>
+	<div id="section_2" class="sections">
 	<a name="section_2"></a>
-	<div style="font-size:4cm;"><span style="color:yellow;">2016</span>年<span style="color:yellow;">07</span>月<span style="color:yellow;">04</span>日<span style="color:yellow;">13</span>時</div>
-	<div style="font-size:3cm;">懸浮微粒濃度為 <span style="color:yellow;">100.1</span> µg/m<sup>3</sup></div> 
-	</div>
-	<div id="section_3">
-	<a name="section_3"></a>
-	<div>空氣品質<span style="color:yellow;">良好</span></div>
-	<div>揚塵防制不能少</div>
-	</div>
-	<div id="section_4">
-	<a name="section_4"></a>
-	<div>生活環境更美好</div>
-	<div>花蓮縣環境保護局關心您</div>
-	</div>
-	<div id="section_5">
-	<a name="section_5"></a>
-	<div>威陞環境科技股份有限公司</div>
-	<div><img src="logo.jpg">河川揚塵監控系統</div>
-	</div>
+	<div>懸浮微粒濃度為<span style="color:yellow;">100.11</span>µg/m<sup>3</sup></div><div>空氣品質 <span style="color:yellow;">不良</span></div></div>
+	<div id="section_3" class="sections">
+	<a name="section_3"></a><div>揚塵防制不能少生活環境更美好</div><div>花蓮縣環境保護局關心您</div></div>
+	<div id="section_4" class="sections">
+	<a name="section_4"></a><div><span style="color:green;">威陞環境科技股份有限公司</span></div><div><img src="logo.jpg"> 河川揚塵監控系統</div></div>
+
 </div>
--->
 </body>
 </html>
