@@ -164,7 +164,7 @@
 											<span><i class="icon icon-user"></i> By <a href="#">John Doe</a> </span>
 											<span><i class="icon icon-tag"></i> <a href="#">Duis</a>, <a href="#">News</a> </span>
 											<span><i class="icon icon-comments"></i> <a href="#">12 Comments</a></span>
-											<a href="blog-post.html" class="btn btn-xs btn-primary pull-right">Read more...</a>
+											<a href="#" class="btn btn-xs btn-primary pull-right" onclick="test_jsonp()">Read more...</a>
 										</div>
 
 									</div>
@@ -240,12 +240,25 @@
 
 		<!-- Custom JS -->
 		<script src="js/custom.js"></script>
-		<script src="js/jquery.urlive.min.js"></script>
+	
 		<script>
-			$(document).ready(function(){
-				$('#post-image-1').urlive({ imageSize: 'small' });
-				
-			})
+		function test_jsonp(){
+			$.ajax({
+				url: "http://wowauction.rf.gd/see.php",
+			 
+				// The name of the callback parameter, as specified by the YQL service
+				jsonp: "callback",
+			 
+				// Tell jQuery we're expecting JSONP
+				dataType: "jsonp",
+						 
+				// Work with the response
+				success: function( response ) {
+					console.log( response ); // server response
+				}
+			});
+			
+		}
 		</script>
 		<!-- Google Analytics: Change UA-XXXXX-X to be your site's ID. Go to http://www.google.com/analytics/ for more information.
 		<script type="text/javascript">
