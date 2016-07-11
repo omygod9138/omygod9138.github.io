@@ -25,17 +25,16 @@
 			title : 'New message', //title of notification
 			body  : 'message input here', // message to be shown
 			icon  : 'picture path', // icon of notification
-			perm  : initializeEvents.call(this)
+			close : 3000//time delay to close notification after msg
 		}
-		
-		// Create options by extending defaults with the passed in arugments
+		//combine options with default options if any
 		if (arguments[0] && typeof arguments[0] === "object") {
 		  this.options = extendDefaults(defaults, arguments[0]);
-		  this.options.perm = initializeEvents.call(this);
+		  
 		}else{
 		  this.options = defaults;
 		}
-		console.log('construct', this);
+		this.options.perm = initializeEvents.call(undefined, this);
 	}
 	// Public Methods
 	Notify.prototype.send = function(){
@@ -51,12 +50,13 @@
 			}
 			
 			var n = new Notification(msg.title, options);
+			setTimeout(n.close.bind(n), this.options.close);//set timeout to close notification
 			
 		}
 	 
 	}
 	// Private Methods
-	function initializeEvents(){
+	function initializeEvents(e){
 	
 		// check if have permission for notification, if not, ask for it
 		if (window.Notification && Notification.permission !== "granted") {
@@ -67,7 +67,7 @@
 			});
 		}
 
-		// If the user agreed to get notified, try to send permission granted notification
+		// If the user agreed to get notified, send a 'permission granted' notification msg
 		if (window.Notification && Notification.permission === "granted") {
 			//custom the message you want to send
 			return true;
@@ -82,24 +82,25 @@
 				Notification.permission = status;
 			}
 
-			// If the user said okay
+			// If permission granted
 			if (status === "granted") {
-				console.log('granted');
+				e.options.perm = true;
+				e.send({'body': 'permission granted', 'icon': e.options.icon, 'tag': 'once'});
 				return true;
 			}
 
 			// Otherwise, we can fallback to a regular modal alert
 			else {
-			  alert("Hi!");
+			  console.log('permission not granted, fallback to a regular modal alert');
 			  return false;
 			}
 		  });
 		}
 
-		// If the user refuses to get notified
+		// If permission not granted
 		else {
-		  // We can fallback to a regular modal alert
-		  alert("Hi!");
+		 
+		  console.log('permission not granted, fallback to a regular modal alert');
 		  return false;
 		}
  
