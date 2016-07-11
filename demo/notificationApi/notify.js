@@ -18,13 +18,11 @@
 
 // Version 0.1
 (function() {
-    var privateVar = "You can't access me in the console"
-	// Define our constructor
-	
+   
 	this.Notify = function(){
 		//define options
 		var defaults = {
-			title : 'Title', //title of notification
+			title : 'New message', //title of notification
 			body  : 'message input here', // message to be shown
 			icon  : 'picture path', // icon of notification
 			perm  : initializeEvents.call(this)
@@ -59,10 +57,8 @@
 	}
 	// Private Methods
 	function initializeEvents(){
-		console.log('init...', this);
-		
-		// At first, let's check if we have permission for notification
-		// If not, let's ask for it
+	
+		// check if have permission for notification, if not, ask for it
 		if (window.Notification && Notification.permission !== "granted") {
 			Notification.requestPermission(function (status) {
 				if (Notification.permission !== status) {
@@ -71,10 +67,9 @@
 			});
 		}
 
-		// If the user agreed to get notified
-		// Let's try to send ten notifications
+		// If the user agreed to get notified, try to send permission granted notification
 		if (window.Notification && Notification.permission === "granted") {
-			console.log('granted');
+			//custom the message you want to send
 			return true;
 		}
 
