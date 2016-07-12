@@ -1,4 +1,18 @@
-花蓮縣環境保護局河川揚塵監測計畫|%s年%s月%s日%s時
-懸浮微粒濃度為%sµg/m<sup>3</sup>|空氣品質 %s
-揚塵防制不能少生活環境更美好|花蓮縣環境保護局關心您
-<span style="color:green;">威陞環境科技股份有限公司</span>|<img src="logo.jpg"> 河川揚塵監控系統
+花蓮縣政府
+環境保護局
+河川揚塵
+監測計畫
+%s年
+%s月%s日
+{TIME}
+懸浮微粒
+PM<sub>10</sub>濃度
+{VALUE}
+空氣品質 
+{AIRCONDITION}
+揚塵防制
+不能少
+生活環境
+更美好
+<span style="color:green;font-size:4cm;">威陞環境科技股份有限公司</span>
+<span style="font-size:3cm;"><img src="logo.jpg">河川揚塵監控系統</span>
