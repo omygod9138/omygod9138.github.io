@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>花蓮縣環境保護局</title>
+	<!--<link rel="stylesheet" href="normalize.css" />-->
+	<style>
+		body{
+			width:1920px;
+			background-color:black;
+			color:white;
+			overflow-y:hidden;
+			white-space: nowrap;
+			
+		}
+		#caption{
+			left:1920px;
+			height:1080px;
+			position:absolute;
+			text-align:center;
+			/*top:-50px;*/
+		}
+		.sections{
+			
+			min-width:1920px;
+			text-align:center;
+			display: table-cell;
+			font-size:5cm;
+		}
+		#section_1{
+		
+		}
+		img{
+			vertical-align:middle;
+		}
+	</style>
+	<script src="jquery-1.12.4.min.js"></script>
+	<script>
+		function refresh(){
+			var today = new Date();
+			var currentMin = today.getMinutes() * 60 + today.getSeconds();
+			var currentSec = today.getSeconds();
+			console.log(currentMin, currentSec);
+			if(currentMin > 300){
+				var timeLeft = ((3600 - currentMin) + 300) * 1000; 
+				console.log('wait for next hour', timeLeft);
+			}else if(currentMin < 300){
+				var timeLeft = (300 - currentMin) * 1000;
+				console.log('near 5 min', timeLeft);
+			}
+				setTimeout(function(){location.reload();}, timeLeft);
+				setInterval(function(){console.log(new Date().getMinutes() * 60 + new Date().getSeconds())}, 1000);
+		}
+		function go(){
+			var sect = 1
+			var max_sect = document.querySelectorAll("#caption > div").length;
+			var width = 0;
+			
+				setInterval(function(){
+					var cur_sect = '#section_'+sect;
+					//$('#caption').children().not(cur_sect).hide();
+					//$(cur_sect).show();
+					
+					console.log(cur_sect);
+					$('#caption').animate({
+					   'left': width
+					 }, 1500, 'linear');
+					sect++;
+					width -= $(cur_sect).width();
+					
+					if(sect > max_sect){
+						sect = 1;
+						$('#caption').css('left','1920px');
+						width = 0;
+						console.log('condition met', $('#caption').css('left'));
+					}
+				}, 3000);
+		}
+		$(document).ready(function(){})
+	</script>
+</head>
+<body>
+<button onclick="go();">start</button>
+<div id="caption">
+	<div id="section_1" class="sections">
+	<div>花蓮縣政府</div>
+	<div>環境保護局</div>
+	</div>
+	<div id="section_2" class="sections">
+	<div>河川揚塵</div>
+	<div>監測計畫</div>
+	</div>
+	<div id="section_3" class="sections">
+	<div><span style="color:yellow;">2016</span>年<span style="color:yellow;">07</span>月<span style="color:yellow;">04</span>日</div>
+	<div><span style="color:yellow;">13</span>時</div>
+	</div>
+	<div id="section_4" class="sections">
+	<div>懸浮微粒濃度</div>
+	<div><span style="color:yellow;">100.1</span> µg/m<sup>3</sup></div>
+	</div>
+	<div id="section_5" class="sections">
+	<div>空氣品質</div>
+	<div><span style="color:yellow;">良好</span></div>
+	</div>
+	<div id="section_6" class="sections">
+	<div>揚塵防制</div>
+	<div>不能少</div>
+	</div>
+	<div id="section_7" class="sections">
+	<div>生活環境</div>
+	<div>更美好</div>
+	</div>
+	<div id="section_8" class="sections" style="font-size:4cm;">
+	<div><span style="color:green;" >
+	威陞環境科技股份有限公司
+	</span></div>
+	<div><img src="logo.jpg" width="320px" height="240px">河川揚塵監控系統</div>
+	</div>
+	
+</div>
+<!--
+<div id="caption">
+	<div id="section_1">
+	<a name="section_1"></a>
+	<div>花蓮縣環境保護局</div>
+	<div>河川揚塵監測計畫</div>
+	</div>
+	<div id="section_2">
+	<a name="section_2"></a>
+	<div style="font-size:4cm;"><span style="color:yellow;">2016</span>年<span style="color:yellow;">07</span>月<span style="color:yellow;">04</span>日<span style="color:yellow;">13</span>時</div>
+	<div style="font-size:3cm;">懸浮微粒濃度為 <span style="color:yellow;">100.1</span> µg/m<sup>3</sup></div> 
+	</div>
+	<div id="section_3">
+	<a name="section_3"></a>
+	<div>空氣品質<span style="color:yellow;">良好</span></div>
+	<div>揚塵防制不能少</div>
+	</div>
+	<div id="section_4">
+	<a name="section_4"></a>
+	<div>生活環境更美好</div>
+	<div>花蓮縣環境保護局關心您</div>
+	</div>
+	<div id="section_5">
+	<a name="section_5"></a>
+	<div>威陞環境科技股份有限公司</div>
+	<div><img src="logo.jpg">河川揚塵監控系統</div>
+	</div>
+</div>
+-->
+</body>
+</html>
