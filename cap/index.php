@@ -70,20 +70,7 @@ if(!$display){
 				});
 				
 			});
-			/*
-			setInterval(function(){
-				//$('#section_'+sect).fadeOut();
-				$('html, body').animate({
-				   'scrollTop':   $('#section_'+sect).offset().top
-				 }, 1, 'linear', function(){
-					$('#section_'+sect).fadeIn(1000);
-					$('#section_'+(sect - 1)).fadeOut();
-				 });
-				//location.hash = 'section_'+sect;
-				sect++;
-				sect = sect > max_sect ? 1 : sect;
-			}, 3000);
-			*/
+
 		})
 	</script>
 </head>
@@ -102,33 +89,37 @@ if($db_value > 100){
 }
 $value = '<span style="color:yellow;">'.$db_value.'</span>';
 $airCondition = '<span style="color:yellow;">'.$condition.'</span>';
-foreach($str AS $section){
-	$section = explode('|', $section);
-	$div =  "<div id='section_".$sectionCount."' class='sections'>
-			<a name='section_".$sectionCount."'></a>";
-	foreach($section AS $paragraph){	
-		if(preg_match("/%s年%s月%s日%s時/", $paragraph, $matches) === 1){
-			$year = '<span style="color:yellow;">'.date('Y').'</span>';
-			$mth = '<span style="color:yellow;">'.date('m').'</span>';
-			$day = '<span style="color:yellow;">'.date('d').'</span>';
-			$hr = '<span style="color:yellow;">'.date('H').'</span>';
-			$paragraph = sprintf($paragraph, $year, $mth, $day, $hr);
+foreach($str AS $paragraph){
+	//$section = explode('|', $section);
+	$div =  "<div id='section_".$sectionCount."' class='sections'>";
+		if(preg_match("/%s年/", $paragraph, $matches) === 1){
+			$year 		= '<span style="color:yellow;">'.date('Y').'</span>';
+			$paragraph 	= sprintf($paragraph, $year);
 		}
-		
-		if(preg_match("/µg/", $paragraph, $matches) === 1){
-			$paragraph = sprintf($paragraph, $value);
+		if(preg_match("/%s月%s日/", $paragraph, $matches) === 1){
+			$mth  		= '<span style="color:yellow;">'.date('m').'</span>';
+			$day  		= '<span style="color:yellow;">'.date('d').'</span>';
+			$paragraph 	= sprintf($paragraph, $mth, $day);
 		}
-		
-		if(preg_match("/空氣品質/", $paragraph, $matches) === 1){
-			$paragraph = sprintf($paragraph, $airCondition);
+		if(preg_match("/{TIME}/", $paragraph, $matches) === 1){
+			$time  		= '<span style="color:yellow;">'.date('H:i A').'</span>';
+			$paragraph 	= preg_replace('/{TIME}/', $time, $paragraph);
 		}
-			
-
-		
+		if(preg_match('/{VALUE}/', $paragraph, $matches) === 1){
+			$value 		= '<span style="color:yellow;">'.$value.'µg/m<sup>3</sup></span>';
+			$paragraph 	= preg_replace('/{VALUE}/', $value, $paragraph);
+			$div =  "<div id='section_".$sectionCount."' class='sections' style='font-size:6cm'>";
+		}
+		if(preg_match('/{AIRCONDITION}/', $paragraph, $matches) === 1){
+			$paragraph = preg_replace('/{AIRCONDITION}/', $airCondition, $paragraph);
+		}
 		$div .=	"<div>".$paragraph."</div>";
-	}
+	
+	
 	echo $div."</div>";
 	$sectionCount++;
+	
+	
 }
 ?>
 <!--
