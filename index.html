@@ -271,6 +271,86 @@
 			$('#aboutMe').load('README.md');
 		})
 		</script>
+		<script>
+			var uid ,accessToken;
+			function postMessage(){
+				//FB.api('/me/feed', 'post', {message: 'Hello, world!'});
+			}
+			function logout(){
+				console.log('logged out');
+			}
+			function get_friends(){
+				FB.api('/me/taggable_friends', function(response) {
+					var tr = '';
+					$.each(response['data'], function(i, v){
+						console.log('data',v);
+						
+						tr += "<tr><td><img src='"+v.picture.data.url+"'/></td><td>"+v.name+"</td></tr>";
+					})  
+					$('table tbody').html(tr);
+				});
+			}
+			function updateStatusCallback(response){
+				console.log('status', response);
+				if(response.status === 'connected'){
+					uid = response.authResponse.userID;
+					accessToken = response.authResponse.accessToken;
+					 FB.api('/me', function(response) {
+					   console.log('Good to see you, ' + response.name + '.', response);
+					   get_friends();
+					   $('#logoutbtn').show();
+					 });
+					
+				}else if (response.status === 'not_authorized') {
+				// the user is logged in to Facebook, 
+				// but has not authenticated your app
+					$('#logoutbtn').hide();
+					FB.login( function(response) {
+						if (response.authResponse) {
+						 console.log('Welcome!  Fetching your information.... ');
+						 FB.api('/me', function(response) {
+						   console.log('Good to see you, ' + response.name + '.', response);
+						   get_friends();
+						    $('#logoutbtn').show();
+						 });
+						} else {
+						 console.log('User cancelled login or did not fully authorize.');
+						}
+					});
+			    } else {
+				// the user isn't logged in to Facebook.
+					
+					FB.login(function(response) {
+						console.log('Welcome!  Fetching your information.... ', response);
+						if (response.authResponse) {
+						 console.log('Welcome!  Fetching your information.... ');
+						 FB.api('/me', function(response) {
+						   console.log('Good to see you, ' + response.name + '.', response);
+						   get_friends();
+						   $('#logoutbtn').show();
+						 });
+						} else {
+							console.log('User cancelled login or did not fully authorize.');
+						}
+					});
+					$('#logoutbtn').hide();
+			    }
+			}
+			$(document).ready(function() {
+			  $.ajaxSetup({ cache: true });
+			  $.getScript('//connect.facebook.net/zh_TW/sdk.js', function(){
+				FB.init({
+				  appId: '593921763996004',
+				  cookie     : true,  // enable cookies to allow the server to access 
+                        // the session
+				  xfbml      : true,
+				  version: 'v2.5' // or v2.0, v2.1, v2.2, v2.3
+				});     
+				//$('#loginbutton,#feedbutton').removeAttr('disabled');
+				FB.getLoginStatus(updateStatusCallback);
+			  });
+			});
+		</script>
 		<!-- Google Analytics: Change UA-XXXXX-X to be your site's ID. Go to http://www.google.com/analytics/ for more information.
 		<script type="text/javascript">
 
