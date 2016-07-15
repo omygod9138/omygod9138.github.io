@@ -1,0 +1,23 @@
+html {
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+html,
+body {
+	min-height: 100%;
+}
+
+body {
+	background-color: #FFF;
+	color: #61656a;	
+	font-family: "Open Sans","微軟正黑體", Arial, sans-serif;
+	font-size: 13px;
+	line-height: 23px;
+	margin: 0;
+}
+
+div.body {
+	min-height: 100%;
+	width: 100%;
+}

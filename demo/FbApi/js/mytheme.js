@@ -1,0 +1,10 @@
+
+
+$(function() {
+	
+		$(window).load(function () {
+			
+		
+		});
+
+})

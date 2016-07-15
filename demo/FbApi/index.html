@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>FB Javascript SDK</title>
+
+	    <meta property="og:title" content="FB Javascript SDK" />
+	    <meta property="og:description" content="FB Javascript SDK"/>
+		<!-- Fonts -->
+		<link href="lib/css/glyphicons.css" rel="stylesheet">
+		<link href="lib/css/glyphicons-bootstrap.css" rel="stylesheet">
+
+		<!-- Bootstrap core CSS -->
+		<link rel="stylesheet" href="lib/css/bootstrap.css">
+		<link rel="stylesheet" href="lib/css/bootstrap-theme.css">
+
+		<!-- Theme CSS -->    
+	    <link rel="stylesheet" href="css/theme.css">
+	    <link rel="stylesheet" href="css/theme-elements.css">    
+
+	    <!-- Responsive CSS -->
+	    <link rel="stylesheet" href="css/theme-responsive.css" />
+
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+	<div class="body">
+		<div class="container">
+			<header>
+				
+
+			</header>
+			<main>
+				<table border='1' width='1024'>
+					<tbody>
+					</tbody>
+				</table>
+				<a id="logoutbtn" href="#" onclick="FB.logout(logout)">logout</a>
+				<a id="post_msg" href="#" onclick="postMessage()">POST A MESSAGE</a>
+			</main>
+			<footer>
+				
+			</footer>
+		</div>
+		
+	</div>
+		<script src="lib/js/jquery.1.11.3.min.js"></script>
+		<script src="lib/js/bootstrap.min.js"></script>
+		<script>
+			var uid ,accessToken;
+			function postMessage(){
+				//FB.api('/me/feed', 'post', {message: 'Hello, world!'});
+			}
+			function logout(){
+				console.log('logged out');
+			}
+			function get_friends(){
+				FB.api('/me/taggable_friends', function(response) {
+					var tr = '';
+					$.each(response['data'], function(i, v){
+						console.log('data',v);
+						
+						tr += "<tr><td><img src='"+v.picture.data.url+"'/></td><td>"+v.name+"</td></tr>";
+					})  
+					$('table tbody').html(tr);
+				});
+			}
+			function updateStatusCallback(response){
+				console.log('logged in', response);
+				if(response.status === 'connected'){
+					uid = response.authResponse.userID;
+					accessToken = response.authResponse.accessToken;
+					 FB.api('/me', function(response) {
+					   console.log('Good to see you, ' + response.name + '.', response);
+					   get_friends();
+					   $('#logoutbtn').show();
+					 });
+					
+				}else if (response.status === 'not_authorized') {
+				// the user is logged in to Facebook, 
+				// but has not authenticated your app
+					$('#logoutbtn').hide();
+					FB.login( function(response) {
+						if (response.authResponse) {
+						 console.log('Welcome!  Fetching your information.... ');
+						 FB.api('/me', function(response) {
+						   console.log('Good to see you, ' + response.name + '.', response);
+						   get_friends();
+						    $('#logoutbtn').show();
+						 });
+						} else {
+						 console.log('User cancelled login or did not fully authorize.');
+						}
+					});
+			    } else {
+				// the user isn't logged in to Facebook.
+					$('#logoutbtn').hide();
+					FB.login(function(response) {
+						if (response.authResponse) {
+						 console.log('Welcome!  Fetching your information.... ');
+						 FB.api('/me', function(response) {
+						   console.log('Good to see you, ' + response.name + '.', response);
+						   get_friends();
+						   $('#logoutbtn').show();
+						 });
+						} else {
+							console.log('User cancelled login or did not fully authorize.');
+						}
+					});
+			    }
+			}
+			$(document).ready(function() {
+			  $.ajaxSetup({ cache: true });
+			  $.getScript('//connect.facebook.net/zh_TW/sdk.js', function(){
+				FB.init({
+				  appId: '593921763996004',
+				  version: 'v2.5' // or v2.0, v2.1, v2.2, v2.3
+				});     
+				//$('#loginbutton,#feedbutton').removeAttr('disabled');
+				FB.getLoginStatus(updateStatusCallback);
+			  });
+			});
+		</script>
+	</body>
+</html>
