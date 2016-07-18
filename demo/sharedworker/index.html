@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Webworker sharedworker</title>
+	</head>
+	<body>
+	<div class="body">
+		<div class="container">
+			<header>
+				
+			</header>
+			<main>
+				
+			</main>
+			<footer>
+				
+			</footer>
+		</div>
+		
+	</div>
+		<script src="js/jquery.1.11.3.min.js"></script>
+		
+		<script>
+		var worker;
+		function test_worker(){
+			console.log('function called')
+			if(worker) worker.terminate();
+			worker = new SharedWorker("_sharedworker.js", "wk");
+			worker.port.onmessage = function(e){
+				console.log('[index] message received: ', e.data);
+			}
+			
+		}
+		$(document).ready(function(){
+			test_worker();
+		})
+		</script>
+	</body>
+</html>
