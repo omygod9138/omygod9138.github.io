@@ -43,11 +43,11 @@
 		<script>
 		$(document).ready(function() {
                  console.log("Time until DOMready: ", Date.now()-timerStart);
-				 $('.container').append("<li>Time until DOMready: " , Date.now()-timerStart + "</li>");
+				 $('.container').prepend("<li>Time until DOMready: " , Date.now()-timerStart + "</li>");
              });
              $(window).load(function() {
                  console.log("Time until everything loaded: ", Date.now()-timerStart);
-				  $('.container').append("<li>Time until everything loaded: " , Date.now()-timerStart + "</li>");
+				  $('.container').prepend("<li>Time until everything loaded: " , Date.now()-timerStart + "</li>");
              });
 		</script>
 	</body>
