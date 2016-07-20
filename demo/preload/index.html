@@ -45,12 +45,7 @@
 					load_img(i);
 				}
 			}
-			/*
-				'http://wow-auction.hostkda.com/img/img_02.jpg',
-				'http://wow-auction.hostkda.com/img/img_03.jpg',
-				'http://wow-auction.hostkda.com/img/img_04.jpg',
-				'http://wow-auction.hostkda.com/img/img_05.jpg'	
-			*/
+			
 			var worker;
 			var image = [
 							'http://i.imgur.com/VEDxlqk.jpg',
@@ -73,11 +68,11 @@
 			}
 			$(document).ready(function() {
                  console.log("Time until DOMready: ", Date.now()-timerStart);
-				 $('.container').append("<li>Time until DOMready: " , Date.now()-timerStart + "</li>");
+				 $('.container').prepend("<li>Time until DOMready: " , Date.now()-timerStart + "</li>");
              });
              $(window).load(function() {
                  console.log("Time until everything loaded: ", Date.now()-timerStart);
-				  $('.container').append("<li>Time until everything loaded: " , Date.now()-timerStart + "</li>");
+				  $('.container').prepend("<li>Time until everything loaded: " , Date.now()-timerStart + "</li>");
              });
 		</script>
 	</body>
