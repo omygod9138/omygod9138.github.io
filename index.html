@@ -63,48 +63,7 @@
 							My Demo Page
 						</a>
 					</h1>
-					<div class="navbar-collapse nav-main-collapse collapse">
-						
-						<nav class="nav-main mega-menu">
-							<ul class="nav nav-pills nav-main" id="mainMenu">
-							<!--
-								<li>
-									<a href="#">
-										About me
-									</a>
-								</li>
-								<!--
-								<li class="dropdown">
-									<a class="dropdown-toggle" href="#">
-										My Playground
-										<i class="icon icon-caret-down"></i>
-									</a>
-									<ul class="dropdown-menu">
-										<li><a href="#">Home - Default</a></li>
-										<li><a href="#">Home - Basic</a></li>
-										<li><a href="#">Home - Video</a></li>
-										<li><a href="#">Home - Extended</a></li>
-										<li><a href="#">Home - Blog</a></li>
-									</ul>
-								</li>
-								
-								<li class="dropdown">
-									<a class="dropdown-toggle" href="#">
-										My projects
-										<i class="icon icon-caret-down"></i>
-									</a>
-									<ul class="dropdown-menu">
-										<li><a href="#">Home - Default</a></li>
-										<li><a href="#">Home - Basic</a></li>
-										<li><a href="#">Home - Video</a></li>
-										<li><a href="#">Home - Extended</a></li>
-										<li><a href="#">Home - Blog</a></li>
-									</ul>
-								</li>
-								-->
-							</ul>
-						</nav>
-					</div>
+				
 					<button class="btn btn-responsive-nav btn-inverse" data-toggle="collapse" data-target=".nav-main-collapse">
 						<i class="icon icon-bars"></i>
 					</button>
@@ -216,15 +175,7 @@
 									</div>
 								</article>
 
-					<!--
-								<ul class="pagination pagination-lg pull-right">
-									<li><a href="#"><i class="icon icon-chevron-left"></i></a></li>
-									<li class="active"><a href="#">1</a></li>
-									<li><a href="#">2</a></li>
-									<li><a href="#">3</a></li>
-									<li><a href="#"><i class="icon icon-chevron-right"></i></a></li>
-								</ul>
-								-->
+				
 							</div>
 						</div>
 
@@ -289,107 +240,12 @@
 		<script src="js/custom.js"></script>
 	
 		<script>
-		function test_jsonp(){
-			$.ajax({
-				url: "https://wowauction.rf.gd/see.php",
-			 
-				// The name of the callback parameter, as specified by the YQL service
-				jsonp: "callback",
-			 
-				// Tell jQuery we're expecting JSONP
-				dataType: "jsonp",
-						 
-				// Work with the response
-				success: function( response ) {
-					console.log( response ); // server response
-				}
-			});
-			
-		}
+		
 		$(document).ready(function(){
 			$('#aboutMe').load('README.md');
 		})
 		</script>
-		<script>
-			var uid ,accessToken;
-			function postMessage(){
-				//FB.api('/me/feed', 'post', {message: 'Hello, world!'});
-			}
-			function logout(){
-				console.log('logged out');
-			}
-			function get_friends(){
-				FB.api('/me/taggable_friends', function(response) {
-					var tr = '';
-					$.each(response['data'], function(i, v){
-						console.log('data',v);
-						
-						tr += "<tr><td><img src='"+v.picture.data.url+"'/></td><td>"+v.name+"</td></tr>";
-					})  
-					$('table tbody').html(tr);
-				});
-			}
-			function updateStatusCallback(response){
-				console.log('status', response);
-				if(response.status === 'connected'){
-					uid = response.authResponse.userID;
-					accessToken = response.authResponse.accessToken;
-					 FB.api('/me', function(response) {
-					   console.log('Good to see you, ' + response.name + '.', response);
-					   get_friends();
-					   $('#logoutbtn').show();
-					 });
-					
-				}else if (response.status === 'not_authorized') {
-				// the user is logged in to Facebook, 
-				// but has not authenticated your app
-					$('#logoutbtn').hide();
-					FB.login( function(response) {
-						if (response.authResponse) {
-						 console.log('Welcome!  Fetching your information.... ');
-						 FB.api('/me', function(response) {
-						   console.log('Good to see you, ' + response.name + '.', response);
-						   get_friends();
-						    $('#logoutbtn').show();
-						 });
-						} else {
-						 console.log('User cancelled login or did not fully authorize.');
-						}
-					});
-			    } else {
-				// the user isn't logged in to Facebook.
-					
-					FB.login(function(response) {
-						console.log('Welcome!  Fetching your information.... ', response);
-						if (response.authResponse) {
-						 console.log('Welcome!  Fetching your information.... ');
-						 FB.api('/me', function(response) {
-						   console.log('Good to see you, ' + response.name + '.', response);
-						   get_friends();
-						   $('#logoutbtn').show();
-						 });
-						} else {
-							console.log('User cancelled login or did not fully authorize.');
-						}
-					});
-					$('#logoutbtn').hide();
-			    }
-			}
-			$(document).ready(function() {
-			  $.ajaxSetup({ cache: true });
-			  $.getScript('//connect.facebook.net/zh_TW/sdk.js', function(){
-				FB.init({
-				  appId: '593921763996004',
-				  cookie     : true,  // enable cookies to allow the server to access 
-                        // the session
-				  xfbml      : true,
-				  version: 'v2.5' // or v2.0, v2.1, v2.2, v2.3
-				});     
-				//$('#loginbutton,#feedbutton').removeAttr('disabled');
-				FB.getLoginStatus(updateStatusCallback);
-			  });
-			});
-		</script>
+	
 		<!-- Google Analytics: Change UA-XXXXX-X to be your site's ID. Go to http://www.google.com/analytics/ for more information.
 		<script type="text/javascript">
 
