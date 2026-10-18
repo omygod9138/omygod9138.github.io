@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Buy-In Yield Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+/* Layout: inputs ticket on the left, results ledger on the right; stacks on phone */
+:root {
+  --bg: #f3f5f2; --panel: #ffffff; --fg: #1b2420; --muted: #5d6b64; --line: #d9e0db;
+  --accent: #1f6b52; --up: #b4462f; --down: #1f6b52; --mark-old: #8a9790; --mark-buy: #c08a1e;
+  --f-display: "Fraunces", Georgia, serif;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121715; --panel: #1a211e; --fg: #e4ebe6; --muted: #93a29a; --line: #2c3631;
+  --accent: #5cc49b; --up: #ef8a72; --down: #5cc49b; --mark-old: #7d8a83; --mark-buy: #e2b14e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121715; --panel: #1a211e; --fg: #e4ebe6; --muted: #93a29a; --line: #2c3631;
+  --accent: #5cc49b; --up: #ef8a72; --down: #5cc49b; --mark-old: #7d8a83; --mark-buy: #e2b14e; color-scheme: dark }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 40px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 20px; }
+h1 { font-family: var(--f-display); font-weight: 600; font-size: 28px; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 4px 0 0; }
+.grid { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; min-width: 0; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 12px; }
+fieldset + fieldset { margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--line); }
+legend { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0; margin-bottom: 10px; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+input { font: 500 16px var(--f-mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+.headline { display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: baseline; }
+.big { font: 600 34px var(--f-mono); font-variant-numeric: tabular-nums; }
+.chip { font: 600 13px var(--f-mono); padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--muted); }
+.lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+/* price scale */
+.scale { position: relative; height: 92px; margin: 22px 8px 6px; }
+.track { position: absolute; left: 0; right: 0; top: 46px; height: 2px; background: var(--line); }
+.arrow { position: absolute; top: 45px; height: 4px; border-radius: 2px; background: currentColor; opacity: .55; }
+.mk { position: absolute; top: 0; transform: translateX(-50%); display: grid; justify-items: center; gap: 2px; font: 500 12px var(--f-mono); white-space: nowrap; }
+.mk .dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; border: 2px solid var(--panel); }
+.mk.below { top: 40px; }
+.mk.below .dot { order: -1; margin: 0 0 4px; }
+.mk-old .dot { background: var(--mark-old); } .mk-old { color: var(--mark-old); }
+.mk-buy .dot { background: var(--mark-buy); } .mk-buy { color: var(--mark-buy); }
+.mk-new .dot { background: var(--accent); width: 14px; height: 14px; } .mk-new { color: var(--accent); font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+td { font-family: var(--f-mono); font-size: 14px; }
+td:first-child { font-family: var(--f-body); color: var(--muted); }
+.tbl { overflow-x: auto; margin-top: 14px; }
+.yields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+@media (max-width: 480px) { .yields { grid-template-columns: minmax(0, 1fr); } }
+.y { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 2px; }
+.y.main { border-color: var(--accent); }
+.y .v { font: 600 22px var(--f-mono); font-variant-numeric: tabular-nums; }
+.y .d { font: 500 12px var(--f-mono); }
+.err { color: var(--up); font-size: 13px; margin: 8px 0 0; }
+h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 22px 0 0; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Buy-In Yield Calculator</h1>
+    <p class="sub">See how a planned buy moves your average price and your dividend yield on cost. Example numbers are filled in; replace them with yours.</p>
+  </header>
+
+  <div class="grid">
+    <form class="panel" id="f" autocomplete="off">
+      <fieldset>
+        <legend>Current holding</legend>
+        <div class="row2">
+          <label for="s">Shares<input id="s" type="number" inputmode="decimal" min="0" step="any" value="100"></label>
+          <label for="a">Avg price<input id="a" type="number" inputmode="decimal" min="0" step="any" value="50"></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Planned buy-in</legend>
+        <div class="row2">
+          <label for="b">Shares<input id="b" type="number" inputmode="decimal" min="0" step="any" value="50"></label>
+          <label for="p">Buy price<input id="p" type="number" inputmode="decimal" min="0" step="any" value="40"></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Dividend</legend>
+        <label for="d">Annual dividend per share<input id="d" type="number" inputmode="decimal" min="0" step="any" value="2"></label>
+        <p class="hint">Quarterly payer? Enter the quarterly amount × 4.</p>
+      </fieldset>
+      <p class="err" id="err" hidden></p>
+    </form>
+
+    <section class="panel" aria-live="polite">
+      <div class="headline">
+        <div><div class="lbl">New avg price</div><div class="big" id="oNewAvg">–</div></div>
+        <span class="chip" id="oChip">–</span>
+      </div>
+
+      <div class="scale" id="scale" aria-hidden="true">
+        <div class="track"></div>
+        <div class="arrow" id="arrow"></div>
+        <div class="mk mk-old" id="mkOld"><span>old avg</span><span id="mkOldV"></span><span class="dot"></span></div>
+        <div class="mk mk-buy below" id="mkBuy"><span class="dot"></span><span id="mkBuyV"></span><span>buy</span></div>
+        <div class="mk mk-new" id="mkNew"><span>new avg</span><span id="mkNewV"></span><span class="dot"></span></div>
+      </div>
+
+      <h2>Dividend yield</h2>
+      <div class="yields">
+        <div class="y"><span class="lbl">On old avg</span><span class="v" id="yOld">–</span><span class="d flat">&nbsp;</span></div>
+        <div class="y main"><span class="lbl">On new avg</span><span class="v" id="yNew">–</span><span class="d" id="yDelta">–</span></div>
+        <div class="y"><span class="lbl">At buy price</span><span class="v" id="yBuy">–</span><span class="d flat">yield on this lot</span></div>
+      </div>
+
+      <div class="tbl">
+        <table>
+          <thead><tr><th></th><th>Before</th><th>After</th><th>Change</th></tr></thead>
+          <tbody>
+            <tr><td>Shares</td><td id="t1a"></td><td id="t1b"></td><td id="t1c"></td></tr>
+            <tr><td>Avg price</td><td id="t2a"></td><td id="t2b"></td><td id="t2c"></td></tr>
+            <tr><td>Total cost</td><td id="t3a"></td><td id="t3b"></td><td id="t3c"></td></tr>
+            <tr><td>Annual dividends</td><td id="t4a"></td><td id="t4b"></td><td id="t4c"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ids = ["s", "a", "b", "p", "d"];
+  const num = v => new Intl.NumberFormat(undefined, { maximumFractionDigits: 4 }).format(v);
+  const money = v => new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(v);
+  const pct = v => (v * 100).toFixed(2) + "%";
+  const signed = (v, f) => (v > 0 ? "+" : v < 0 ? "−" : "±") + f(Math.abs(v));
+  const cls = (el, v, invert) => { el.classList.remove("up", "down", "flat"); el.classList.add(v === 0 ? "flat" : (v > 0) !== !!invert ? "up" : "down"); };
+
+  // pure calc
+  function calc(s, a, b, p, d) {
+    const shares = s + b;
+    const cost0 = s * a, cost1 = cost0 + b * p;
+    const avg1 = shares > 0 ? cost1 / shares : 0;
+    return {
+      shares, cost0, cost1, avg1,
+      dAvg: avg1 - a, dAvgPct: a > 0 ? (avg1 - a) / a : 0,
+      y0: a > 0 ? d / a : 0, y1: avg1 > 0 ? d / avg1 : 0, yb: p > 0 ? d / p : 0,
+      div0: s * d, div1: shares * d
+    };
+  }
+
+  function render() {
+    const v = ids.map(id => parseFloat($(id).value));
+    const err = $("err");
+    if (v.some(x => !isFinite(x) || x < 0)) { err.textContent = "Enter a number of 0 or more in every field."; err.hidden = false; return; }
+    const [s, a, b, p, d] = v;
+    if (s + b <= 0) { err.textContent = "Total shares must be above 0."; err.hidden = false; return; }
+    err.hidden = true;
+    const r = calc(s, a, b, p, d);
+
+    $("oNewAvg").textContent = money(r.avg1);
+    const chip = $("oChip");
+    chip.textContent = r.dAvg === 0 ? "no change" : (r.dAvg > 0 ? "▲ rises " : "▼ falls ") + money(Math.abs(r.dAvg)) + " (" + pct(Math.abs(r.dAvgPct)) + ")";
+    cls(chip, r.dAvg);
+
+    // scale: position old avg, buy, new avg
+    const lo = Math.min(a, p, r.avg1), hi = Math.max(a, p, r.avg1);
+    const pad = (hi - lo) * 0.12 || Math.max(hi * 0.1, 1);
+    const pos = x => ((x - (lo - pad)) / ((hi + pad) - (lo - pad))) * 100;
+    $("mkOld").style.left = pos(a) + "%"; $("mkOldV").textContent = money(a);
+    $("mkNew").style.left = pos(r.avg1) + "%"; $("mkNewV").textContent = money(r.avg1);
+    $("mkBuy").style.left = pos(p) + "%"; $("mkBuyV").textContent = money(p);
+    $("mkBuy").hidden = b === 0;
+    // if new and old overlap, lift old label
+    const close = Math.abs(pos(a) - pos(r.avg1)) < 14;
+    $("mkOld").style.top = close ? "-22px" : "0";
+    const arrow = $("arrow");
+    arrow.style.left = Math.min(pos(a), pos(r.avg1)) + "%";
+    arrow.style.width = Math.abs(pos(r.avg1) - pos(a)) + "%";
+    cls(arrow, r.dAvg);
+
+    $("yOld").textContent = pct(r.y0);
+    $("yNew").textContent = pct(r.y1);
+    $("yBuy").textContent = pct(r.yb);
+    const dy = r.y1 - r.y0;
+    $("yDelta").textContent = signed(dy * 100, x => x.toFixed(2)) + " pts";
+    cls($("yDelta"), dy, true);
+
+    const rows = [
+      [s, r.shares, num], [a, r.avg1, money], [r.cost0, r.cost1, money], [r.div0, r.div1, money]
+    ];
+    rows.forEach(([x, y, f], i) => {
+      $("t" + (i + 1) + "a").textContent = f(x);
+      $("t" + (i + 1) + "b").textContent = f(y);
+      const c = $("t" + (i + 1) + "c");
+      c.textContent = signed(y - x, f);
+      c.classList.remove("up", "down", "flat");
+      if (y === x) c.classList.add("flat");
+    });
+    cls($("t2c"), r.dAvg);
+  }
+
+  ids.forEach(id => $(id).addEventListener("input", render));
+  $("f").addEventListener("submit", e => e.preventDefault());
+  render();
+})();
+</script>
+</body>
+</html>
