@@ -246,6 +246,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       <div class="det-head"><span class="det-name" id="dName"></span><span class="det-sub" id="dSub"></span></div>
       <div class="kpis">
         <div class="y main"><span class="lbl">Current price</span><span class="v" id="dPx"></span><span class="d" id="dPxD"></span></div>
+        <div class="y"><span class="lbl">Max buy for 6% yield</span><span class="v" id="dMax"></span><span class="d" id="dMaxD"></span><span class="note">Last 12 months' cash dividend ÷ 6%</span></div>
         <div class="y"><span class="lbl">Dividend yield</span><span class="v" id="dYld"></span><span class="note" id="dYldN"></span></div>
         <div class="y"><span class="lbl">P/E ratio</span><span class="v" id="dPe"></span><span class="note" id="dPeN"></span></div>
         <div class="y"><span class="lbl">Avg annual dividend</span><span class="v" id="dAvg"></span><span class="note" id="dAvgN"></span></div>
@@ -482,6 +483,16 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     cls($("dPxD"), ch);
     $("dYld").textContent = pct(r.close > 0 ? d / r.close : 0);
     $("dYldN").textContent = money(d) + " cash in the last 12 months (" + r.n + " payout" + (r.n === 1 ? "" : "s") + ") ÷ price";
+
+    // max price that still yields 6% on the trailing dividend
+    const maxBuy = d / 0.06, el = $("dMaxD");
+    el.classList.remove("ok", "no", "flat");
+    if (d > 0) {
+      $("dMax").textContent = money(+maxBuy.toFixed(2));
+      const gap = r.close - maxBuy;
+      el.textContent = gap <= 0 ? "✓ now " + money(+(-gap).toFixed(2)) + " below it" : "✗ now " + money(+gap.toFixed(2)) + " (" + pct(gap / maxBuy) + ") above";
+      el.classList.add(gap <= 0 ? "ok" : "no");
+    } else { $("dMax").textContent = "n/a"; el.textContent = "No dividend in the last 12 months"; el.classList.add("flat"); }
 
     // P/E as published by the exchange; 0 means trailing earnings are negative, none for ETFs
     const pe = r.per;
