@@ -162,20 +162,20 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     <form class="panel" id="f2" autocomplete="off">
       <fieldset>
         <legend>Target</legend>
-        <label for="t">Target dividend yield (%)<input id="t" type="number" inputmode="decimal" min="0" step="any" value="4.5"></label>
+        <label for="t">Target dividend yield (%)<input id="t" type="number" inputmode="decimal" min="0" step="any" value="6"></label>
         <label for="d2">Annual dividend per share<input id="d2" type="number" inputmode="decimal" min="0" step="any" value="2"></label>
       </fieldset>
       <fieldset>
         <legend>Current holding</legend>
         <div class="row2">
-          <label for="s2">Shares<input id="s2" type="number" inputmode="decimal" min="0" step="any" value="100"></label>
-          <label for="a2">Avg price<input id="a2" type="number" inputmode="decimal" min="0" step="any" value="50"></label>
+          <label for="s2">Shares<input id="s2" type="number" inputmode="decimal" min="0" step="any" value="0"></label>
+          <label for="a2">Avg price<input id="a2" type="number" inputmode="decimal" min="0" step="any" value="0"></label>
         </div>
       </fieldset>
       <fieldset>
         <legend>Planned buy-in</legend>
         <div class="row2">
-          <label for="b2">Shares<input id="b2" type="number" inputmode="decimal" min="0" step="any" value="50"></label>
+          <label for="b2">Shares<input id="b2" type="number" inputmode="decimal" min="0" step="any" value="1000"></label>
           <label for="p2">Buy price<input id="p2" type="number" inputmode="decimal" min="0" step="any" value="40"></label>
         </div>
         <button type="button" class="linkbtn" id="copy">Copy values from Buy-in calculator</button>
@@ -281,7 +281,8 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     const maxBuy = avgT;                                      // a single lot hits target at or below this
     const needBuy = b > 0 ? (avgT * (s + b) - s * a) / b : NaN; // buy price so new avg = avgT
     let shares;                                               // shares at price p so new avg = avgT
-    if (a <= avgT) shares = 0;
+    if (s === 0) shares = p <= avgT ? 0 : Infinity;         // new position: avg = buy price
+    else if (a <= avgT) shares = 0;
     else if (p >= avgT) shares = Infinity;
     else shares = s * (a - avgT) / (avgT - p);
     return { avgT, maxBuy, needBuy, shares };
@@ -307,11 +308,12 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     $("rT").textContent = tv + "%";
     $("rAvg").textContent = money(r.avgT);
     $("rMax").textContent = money(r.maxBuy);
-    $("rCur").textContent = a > 0 ? pct(d / a) : "–";
-    if (a > 0) mark($("rCurD"), d / a >= tv / 100, d / a >= tv / 100 ? "✓ at or above target" : "✗ " + ((tv / 100 - d / a) * 100).toFixed(2) + " pts below target");
+    $("rCur").textContent = s > 0 && a > 0 ? pct(d / a) : "No holding";
+    if (!(s > 0 && a > 0)) { $("rCurD").textContent = "\u00a0"; $("rCurD").className = "d flat"; }
+    else mark($("rCurD"), d / a >= tv / 100, d / a >= tv / 100 ? "✓ at or above target" : "✗ " + ((tv / 100 - d / a) * 100).toFixed(2) + " pts below target");
     mark($("rMaxD"), p <= r.maxBuy, p <= r.maxBuy ? "✓ your buy price fits" : "✗ your buy price is " + money(p - r.maxBuy) + " too high");
 
-    if (a <= r.avgT) {
+    if (s > 0 && a <= r.avgT) {
       mark($("rNeedD"), true, "✓ already at target");
       $("rNeed").textContent = b > 0 ? "≤ " + money(r.needBuy) : "Any price";
     } else if (b <= 0) {
@@ -325,8 +327,9 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       mark($("rNeedD"), p <= r.needBuy, p <= r.needBuy ? "✓ your buy price fits" : "✗ your buy price is " + money(p - r.needBuy) + " too high");
     }
 
-    if (r.shares === 0) { $("rSh").textContent = "0"; mark($("rShD"), true, "✓ already at target"); }
-    else if (!isFinite(r.shares)) { $("rSh").textContent = "Not reachable"; mark($("rShD"), false, "✗ buy price must be below " + money(r.avgT)); }
+    if (s === 0 && isFinite(r.shares)) { $("rSh").textContent = "Any amount"; mark($("rShD"), true, "✓ your buy price fits"); }
+    else if (r.shares === 0) { $("rSh").textContent = "0"; mark($("rShD"), true, "✓ already at target"); }
+    else if (!isFinite(r.shares)) { $("rSh").textContent = "Not reachable"; mark($("rShD"), false, (s === 0 ? "✗ buy price must be at or below " : "✗ buy price must be below ") + money(r.avgT)); }
     else {
       const need = Math.ceil(r.shares - 1e-9);
       $("rSh").textContent = num(need);
