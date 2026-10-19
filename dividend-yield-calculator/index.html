@@ -92,6 +92,27 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .tick-out { flex: 1 1 260px; font-size: 13px; color: var(--muted); margin: 0; min-width: 0; }
 .tick-out b { color: var(--fg); font-family: var(--f-mono); font-weight: 600; }
 .tick-out.no { color: var(--up); }
+.det-empty { color: var(--muted); }
+.det { display: grid; gap: 20px; }
+.det-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; }
+.det-name { font: 600 20px var(--f-body); }
+.det-sub { color: var(--muted); font-size: 13px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.kpis .y .v { font-size: 24px; }
+.kpis .note { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.range { position: relative; height: 84px; margin: 8px 8px 0; }
+.range .track { top: 30px; height: 6px; border-radius: 3px; background: var(--line); }
+.range .now { position: absolute; top: 22px; width: 4px; height: 22px; border-radius: 2px; background: var(--accent); transform: translateX(-50%); }
+.range .now span { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); font: 600 12px var(--f-mono); color: var(--accent); white-space: nowrap; }
+.range .end { position: absolute; top: 44px; font: 500 12px var(--f-mono); color: var(--muted); white-space: nowrap; }
+.range .end b { color: var(--fg); font-weight: 600; }
+.bars { display: flex; align-items: flex-end; gap: 2px; height: 140px; margin-top: 12px; border-bottom: 1px solid var(--line); position: relative; }
+.bar { flex: 1 1 0; min-width: 0; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; }
+.bar.partial { opacity: .4; }
+.bar:hover, .bar:focus-visible { outline: 2px solid var(--fg); outline-offset: 1px; }
+.bars-x { display: flex; justify-content: space-between; font: 500 11px var(--f-mono); color: var(--muted); margin-top: 4px; }
+.bar-tip { min-height: 20px; font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.bar-tip b { font-family: var(--f-mono); color: var(--fg); }
 </style>
 </head>
 <body>
@@ -105,12 +126,13 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   <form class="panel tick" id="fq" autocomplete="off">
     <label for="q">TW stock / ETF code<input id="q" type="text" inputmode="text" placeholder="2330 or 0056" maxlength="10"></label>
     <button class="btn" id="qGo" type="submit">Fill price &amp; dividend</button>
-    <p class="tick-out" id="qOut">Fills buy price (latest close) and annual dividend (cash paid in the last 12 months) on both tabs. Data: FinMind.</p>
+    <p class="tick-out" id="qOut">Fills buy price (latest close) and annual dividend (cash paid in the last 12 months) on both calculator tabs, and loads the Stock detail tab. Data: FinMind.</p>
   </form>
 
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-buyin" aria-controls="pane-buyin" aria-selected="true">Buy-in calculator</button>
     <button class="tab" role="tab" id="tab-recommended" aria-controls="pane-recommended" aria-selected="false">Recommended price</button>
+    <button class="tab" role="tab" id="tab-detail" aria-controls="pane-detail" aria-selected="false">Stock detail</button>
   </div>
 
   <div class="grid" id="pane-buyin" role="tabpanel" aria-labelledby="tab-buyin">
@@ -212,6 +234,35 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       </div>
     </section>
   </div>
+
+  <section class="panel" id="pane-detail" role="tabpanel" aria-labelledby="tab-detail" aria-live="polite" hidden>
+    <p class="det-empty" id="detEmpty">Enter a TW stock or ETF code above and press the button to see its details here.</p>
+    <div class="det" id="det" hidden>
+      <div class="det-head"><span class="det-name" id="dName"></span><span class="det-sub" id="dSub"></span></div>
+      <div class="kpis">
+        <div class="y main"><span class="lbl">Current price</span><span class="v" id="dPx"></span><span class="d" id="dPxD"></span></div>
+        <div class="y"><span class="lbl">Dividend yield</span><span class="v" id="dYld"></span><span class="note" id="dYldN"></span></div>
+        <div class="y"><span class="lbl">Paying dividends for</span><span class="v" id="dYrs"></span><span class="note" id="dYrsN"></span></div>
+        <div class="y"><span class="lbl">Avg annual dividend</span><span class="v" id="dAvg"></span><span class="note" id="dAvgN"></span></div>
+      </div>
+      <div>
+        <h2>All-time price range</h2>
+        <div class="range" aria-hidden="true">
+          <div class="track"></div>
+          <div class="now" id="dNow"><span id="dNowV"></span></div>
+          <div class="end" style="left:0">low <b id="dLo"></b><br><span id="dLoD"></span></div>
+          <div class="end" style="right:0;text-align:right">high <b id="dHi"></b><br><span id="dHiD"></span></div>
+        </div>
+        <p class="hint" id="dRangeN"></p>
+      </div>
+      <div>
+        <h2>Cash dividend per year</h2>
+        <div class="bars" id="dBars" role="img"></div>
+        <div class="bars-x"><span id="dX0"></span><span id="dX1"></span></div>
+        <p class="bar-tip" id="dTip">Hover or tap a bar for the year's total.</p>
+      </div>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -359,8 +410,8 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     renderTarget();
   });
 
-  // tabs; #recommended deep-links to the second tab
-  const tabs = ["buyin", "recommended"];
+  // tabs; #recommended / #detail deep-link to a tab
+  const tabs = ["buyin", "recommended", "detail"];
   function show(name) {
     tabs.forEach(t => {
       $("tab-" + t).setAttribute("aria-selected", t === name);
@@ -391,19 +442,95 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     return j.data;
   }
   async function lookup(code) {
-    const now = new Date(), yearAgo = new Date(now - 365 * 864e5), weeksAgo = new Date(now - 21 * 864e5);
     const [info, px, dv] = await Promise.all([
-      fm("TaiwanStockInfo", code, iso(weeksAgo)).catch(() => []),
-      fm("TaiwanStockPrice", code, iso(weeksAgo)),
-      fm("TaiwanStockDividend", code, iso(new Date(now - 500 * 864e5)))
+      fm("TaiwanStockInfo", code, "1990-01-01").catch(() => []),
+      fm("TaiwanStockPrice", code, "1990-01-01"),   // full daily history: current price + all-time high/low
+      fm("TaiwanStockDividend", code, "1990-01-01") // full dividend history: yield, years paid, averages
     ]);
-    const last = px.filter(x => x.close > 0).pop();
-    if (!last) throw new Error("no recent price for " + code);
-    // trailing 12 months of cash dividends, by ex-dividend date
-    const paid = dv.filter(x => x.CashExDividendTradingDate && x.CashExDividendTradingDate >= iso(yearAgo) && x.CashExDividendTradingDate <= iso(now))
-      .map(x => (x.CashEarningsDistribution || 0) + (x.CashStatutorySurplus || 0)).filter(v => v > 0);
-    return { name: info[0] && info[0].stock_name, close: last.close, date: last.date, div: paid.reduce((a, b) => a + b, 0), n: paid.length };
+    const days = px.filter(x => x.close > 0);
+    const last = days[days.length - 1];
+    if (!last) throw new Error("no price data for " + code);
+    const today = iso(new Date()), yearAgo = iso(new Date(Date.now() - 365 * 864e5));
+    // cash payouts, dated by ex-dividend day
+    const pays = dv.map(x => ({ ex: x.CashExDividendTradingDate || x.date, cash: (x.CashEarningsDistribution || 0) + (x.CashStatutorySurplus || 0) }))
+      .filter(x => x.cash > 0 && x.ex <= today);
+    const ttm = pays.filter(x => x.ex >= yearAgo);
+    let hi = days[0], lo = days[0];
+    days.forEach(x => { if (x.max > hi.max) hi = x; if (x.min > 0 && x.min < lo.min) lo = x; });
+    return {
+      code, name: info[0] && info[0].stock_name, type: info[0] && info[0].type, industry: info[0] && info[0].industry_category,
+      close: last.close, date: last.date, prev: days.length > 1 ? days[days.length - 2].close : last.close, since: days[0].date,
+      div: ttm.reduce((a, b) => a + b.cash, 0), n: ttm.length, pays, hi, lo
+    };
   }
+
+  function renderDetail(r) {
+    const d = +r.div.toFixed(3);
+    $("detEmpty").hidden = true; $("det").hidden = false;
+    $("dName").textContent = (r.name ? r.name + " " : "") + r.code;
+    $("dSub").textContent = [r.type === "tpex" ? "TPEx" : r.type === "twse" ? "TWSE" : r.type, r.industry].filter(Boolean).join(" · ");
+    $("dPx").textContent = money(r.close);
+    const ch = r.close - r.prev;
+    $("dPxD").textContent = signed(ch, money) + " (" + signed(r.prev ? ch / r.prev * 100 : 0, x => x.toFixed(2)) + "%) · close " + r.date;
+    cls($("dPxD"), ch);
+    $("dYld").textContent = pct(r.close > 0 ? d / r.close : 0);
+    $("dYldN").textContent = money(d) + " cash in the last 12 months (" + r.n + " payout" + (r.n === 1 ? "" : "s") + ") ÷ price";
+
+    // annual totals by ex-dividend year
+    const byYear = {};
+    r.pays.forEach(x => { const y = +x.ex.slice(0, 4); byYear[y] = (byYear[y] || 0) + x.cash; });
+    const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
+    const thisYear = new Date().getFullYear();
+    if (!years.length) {
+      ["dYrs", "dAvg"].forEach(id => $(id).textContent = "None");
+      $("dYrsN").textContent = "No cash dividends in the data."; $("dAvgN").textContent = "";
+      $("dBars").replaceChildren(); $("dX0").textContent = $("dX1").textContent = ""; $("dTip").textContent = "";
+    } else {
+      const first = years[0], span = thisYear - first + 1;
+      const missed = [];
+      for (let y = first; y < thisYear; y++) if (!byYear[y]) missed.push(y);
+      $("dYrs").textContent = span + " yr" + (span === 1 ? "" : "s");
+      $("dYrsN").textContent = "Since " + first + " · " + r.pays.length + " payouts · " +
+        (missed.length ? "no record for " + (missed.length > 4 ? missed.length + " years" : missed.join(", ")) : "paid every year") + ". Counted from the earliest payout in FinMind's data.";
+      const full = years.filter(y => y < thisYear), avg = ys => ys.reduce((a, y) => a + byYear[y], 0) / (ys.length || 1);
+      const last5 = []; for (let y = thisYear - 5; y < thisYear; y++) last5.push(y);
+      const a5 = last5.reduce((a, y) => a + (byYear[y] || 0), 0) / 5;
+      $("dAvg").textContent = money(+a5.toFixed(3));
+      $("dAvgN").textContent = "Last 5 full years (" + last5[0] + "–" + last5[4] + "); all " + full.length + " paying years: " + money(+avg(full).toFixed(3));
+
+      // bar chart, one bar per calendar year from first payout to now
+      const all = []; for (let y = first; y <= thisYear; y++) all.push(y);
+      const max = Math.max(...all.map(y => byYear[y] || 0));
+      const tip = $("dTip");
+      $("dBars").setAttribute("aria-label", "Cash dividend per year, " + first + " to " + thisYear);
+      $("dBars").replaceChildren(...all.map(y => {
+        const v = byYear[y] || 0, el = document.createElement("div");
+        el.className = "bar" + (y === thisYear ? " partial" : "");
+        el.style.height = (v / max * 100) + "%";
+        el.tabIndex = 0;
+        const txt = y + ": " + (v ? money(+v.toFixed(3)) : "none") + (y === thisYear ? " (so far)" : "");
+        el.title = txt; el.setAttribute("aria-label", txt);
+        const showTip = () => { tip.replaceChildren(y + (y === thisYear ? " so far" : "") + ": "); const b = document.createElement("b"); b.textContent = v ? money(+v.toFixed(3)) : "none"; tip.append(b); };
+        el.addEventListener("mouseenter", showTip); el.addEventListener("focus", showTip); el.addEventListener("click", showTip);
+        return el;
+      }));
+      $("dX0").textContent = first; $("dX1").textContent = thisYear + " (so far)";
+    }
+
+    // all-time range (daily high/low, not adjusted for dividends or splits)
+    const span = r.hi.max - r.lo.min || 1;
+    $("dLo").textContent = money(r.lo.min); $("dLoD").textContent = r.lo.date;
+    $("dHi").textContent = money(r.hi.max); $("dHiD").textContent = r.hi.date;
+    const at = Math.min(100, Math.max(0, (r.close - r.lo.min) / span * 100));
+    $("dNow").style.left = at + "%";
+    // keep the "now" label inside the panel near either end
+    $("dNowV").style.transform = "translateX(" + (at > 80 ? "-100%" : at < 20 ? "0" : "-50%") + ")";
+    $("dNowV").style.left = at > 80 ? "100%" : at < 20 ? "0" : "50%";
+    $("dNowV").textContent = "now " + money(r.close);
+    $("dRangeN").textContent = "Daily high/low since " + r.since + ", not adjusted for dividends or splits. Now " +
+      pct((r.hi.max - r.close) / r.hi.max) + " below the high, " + pct((r.close - r.lo.min) / r.lo.min) + " above the low.";
+  }
+
   $("fq").addEventListener("submit", async e => {
     e.preventDefault();
     const code = $("q").value.trim().toUpperCase(), out = $("qOut"), go = $("qGo");
@@ -414,7 +541,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       const d = +r.div.toFixed(3);
       $("p").value = $("p2").value = r.close;
       $("d").value = $("d2").value = d;
-      render(); renderTarget();
+      render(); renderTarget(); renderDetail(r);
       out.innerHTML = "";
       const b = t => { const x = document.createElement("b"); x.textContent = t; return x; };
       out.append((r.name ? r.name + " " : "") + code + " · close ", b(money(r.close)), " (" + r.date + ") · dividend ", b(money(d)),
