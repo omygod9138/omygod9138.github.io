@@ -107,6 +107,12 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .range .now span { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); font: 600 12px var(--f-mono); color: var(--accent); white-space: nowrap; }
 .range .end { position: absolute; top: 44px; font: 500 12px var(--f-mono); color: var(--muted); white-space: nowrap; }
 .range .end b { color: var(--fg); font-weight: 600; }
+.step { display: inline-flex; align-items: center; gap: 6px; justify-self: start; margin: 2px 0 4px; }
+.step button { font: 600 15px var(--f-mono); width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; line-height: 1; }
+.step button:hover { border-color: var(--accent); color: var(--accent); }
+.step button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.step button:disabled { opacity: .4; cursor: default; }
+.step span { font: 600 14px var(--f-mono); min-width: 44px; text-align: center; }
 .hist-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: 10px; }
 .hist-head .lbl { flex-basis: 100%; }
 .hist-v { font: 600 24px var(--f-mono); font-variant-numeric: tabular-nums; }
@@ -246,7 +252,9 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       <div class="det-head"><span class="det-name" id="dName"></span><span class="det-sub" id="dSub"></span></div>
       <div class="kpis">
         <div class="y main"><span class="lbl">Current price</span><span class="v" id="dPx"></span><span class="d" id="dPxD"></span></div>
-        <div class="y"><span class="lbl">Max buy for 6% yield</span><span class="v" id="dMax"></span><span class="d" id="dMaxD"></span><span class="note">Last 12 months' cash dividend ÷ 6%</span></div>
+        <div class="y"><span class="lbl">Max buy for <span id="dTgt">6</span>% yield</span>
+          <span class="step"><button type="button" id="dTgtDn" aria-label="Lower target yield by 0.5%">−</button><span id="dTgtV">6.0%</span><button type="button" id="dTgtUp" aria-label="Raise target yield by 0.5%">+</button></span>
+          <span class="v" id="dMax"></span><span class="d" id="dMaxD"></span><span class="note">Last 12 months' cash dividend ÷ <span id="dTgtN">6</span>%</span></div>
         <div class="y"><span class="lbl">Dividend yield</span><span class="v" id="dYld"></span><span class="note" id="dYldN"></span></div>
         <div class="y"><span class="lbl">P/E ratio</span><span class="v" id="dPe"></span><span class="note" id="dPeN"></span></div>
         <div class="y"><span class="lbl">Avg annual dividend</span><span class="v" id="dAvg"></span><span class="note" id="dAvgN"></span></div>
@@ -472,6 +480,30 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     };
   }
 
+  // target yield for the max-buy card, adjustable in 0.5% steps
+  let tgt = 6, detail = null;
+  try { const v = parseFloat(localStorage.getItem("detTarget")); if (v >= 0.5 && v <= 30) tgt = v; } catch (e) {}
+  function renderMax() {
+    $("dTgt").textContent = $("dTgtN").textContent = tgt;
+    $("dTgtV").textContent = tgt.toFixed(1) + "%";
+    $("dTgtDn").disabled = tgt <= 0.5;
+    if (!detail) return;
+    const { d, close } = detail, maxBuy = d / (tgt / 100), el = $("dMaxD");
+    el.classList.remove("ok", "no", "flat");
+    if (d > 0) {
+      $("dMax").textContent = money(+maxBuy.toFixed(2));
+      const gap = close - maxBuy;
+      el.textContent = gap <= 0 ? "✓ now " + money(+(-gap).toFixed(2)) + " below it" : "✗ now " + money(+gap.toFixed(2)) + " (" + pct(gap / maxBuy) + ") above";
+      el.classList.add(gap <= 0 ? "ok" : "no");
+    } else { $("dMax").textContent = "n/a"; el.textContent = "No dividend in the last 12 months"; el.classList.add("flat"); }
+  }
+  [["dTgtDn", -0.5], ["dTgtUp", 0.5]].forEach(([id, step]) => $(id).addEventListener("click", () => {
+    tgt = Math.min(30, Math.max(0.5, Math.round((tgt + step) * 2) / 2));
+    try { localStorage.setItem("detTarget", tgt); } catch (e) {}
+    renderMax();
+  }));
+  renderMax();
+
   function renderDetail(r) {
     const d = +r.div.toFixed(3);
     $("detEmpty").hidden = true; $("det").hidden = false;
@@ -484,15 +516,8 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     $("dYld").textContent = pct(r.close > 0 ? d / r.close : 0);
     $("dYldN").textContent = money(d) + " cash in the last 12 months (" + r.n + " payout" + (r.n === 1 ? "" : "s") + ") ÷ price";
 
-    // max price that still yields 6% on the trailing dividend
-    const maxBuy = d / 0.06, el = $("dMaxD");
-    el.classList.remove("ok", "no", "flat");
-    if (d > 0) {
-      $("dMax").textContent = money(+maxBuy.toFixed(2));
-      const gap = r.close - maxBuy;
-      el.textContent = gap <= 0 ? "✓ now " + money(+(-gap).toFixed(2)) + " below it" : "✗ now " + money(+gap.toFixed(2)) + " (" + pct(gap / maxBuy) + ") above";
-      el.classList.add(gap <= 0 ? "ok" : "no");
-    } else { $("dMax").textContent = "n/a"; el.textContent = "No dividend in the last 12 months"; el.classList.add("flat"); }
+    detail = { d, close: r.close };
+    renderMax();
 
     // P/E as published by the exchange; 0 means trailing earnings are negative, none for ETFs
     const pe = r.per;
