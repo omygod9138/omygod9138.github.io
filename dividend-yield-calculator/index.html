@@ -813,11 +813,15 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   // budget -> shares at the current price, after TW broker fee (0.1425%, min NT$20)
   const FEE = 0.001425, FEE_MIN = 20;
   const fee = amt => Math.max(FEE_MIN, Math.round(amt * FEE));
+  // big amounts in units (K/M/B or 萬/億); exact value stays in the tooltip
+  const compact = v => Math.abs(v) < 1e4 ? money(v) :
+    new Intl.NumberFormat(lang === "zh" ? "zh-TW" : "en", { notation: "compact", maximumFractionDigits: 2 }).format(v);
+  const setAmt = (id, v) => { $(id).textContent = compact(v); $(id).title = money(v); };
   try { $("bud").value = localStorage.getItem("budget") || ""; } catch (e) {}
   function renderBudget() {
     const out = ["bSh", "bCost", "bLeft", "bDiv"], notes = ["bShN", "bCostN", "bLeftN", "bDivN"];
     const B = parseFloat($("bud").value);
-    const clear = msg => { out.forEach(id => $(id).textContent = "–"); notes.forEach(id => $(id).textContent = ""); $("bShN").textContent = msg; };
+    const clear = msg => { out.forEach(id => { $(id).textContent = "–"; $(id).title = ""; }); notes.forEach(id => $(id).textContent = ""); $("bShN").textContent = msg; };
     if (!detail) return clear("");
     if (!(B > 0)) return clear(t("budEnter"));
     const { close: price, d } = detail;
@@ -827,9 +831,9 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     const amt = n * price, f = fee(amt), cost = amt + f, lots = Math.floor(n / 1000), odd = n % 1000;
     $("bSh").textContent = num(n);
     $("bShN").textContent = lots ? (odd ? t("budLots", num(lots), plural(lots), num(odd)) : t("budLotsOnly", num(lots), plural(lots))) : t("budOdd", num(odd));
-    $("bCost").textContent = money(cost); $("bCostN").textContent = t("budCostN", money(amt), money(f));
-    $("bLeft").textContent = money(B - cost); $("bLeftN").textContent = t("budLeftN", pct((B - cost) / B));
-    $("bDiv").textContent = money(+(n * d).toFixed(2)); $("bDivN").textContent = t("budDivN", pct(d * n / cost));
+    setAmt("bCost", cost); $("bCostN").textContent = t("budCostN", money(amt), money(f));
+    setAmt("bLeft", B - cost); $("bLeftN").textContent = t("budLeftN", pct((B - cost) / B));
+    setAmt("bDiv", +(n * d).toFixed(2)); $("bDivN").textContent = t("budDivN", pct(d * n / cost));
   }
   $("bud").addEventListener("input", () => { try { localStorage.setItem("budget", $("bud").value); } catch (e) {} renderBudget(); });
 
