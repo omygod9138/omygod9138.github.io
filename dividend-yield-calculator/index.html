@@ -126,81 +126,93 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .bars-x { display: flex; justify-content: space-between; font: 500 11px var(--f-mono); color: var(--muted); margin-top: 4px; }
 .bar-tip { min-height: 20px; font-size: 13px; color: var(--muted); margin: 6px 0 0; }
 .bar-tip b { font-family: var(--f-mono); color: var(--fg); }
+.top { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-start; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.lang button { font: 600 13px var(--f-body); color: var(--muted); background: none; border: 0; padding: 6px 12px; cursor: pointer; }
+.lang button + button { border-left: 1px solid var(--line); }
+.lang button[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
+.lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <header>
-    <h1>Buy-In Yield Calculator</h1>
-    <p class="sub">Example numbers are filled in; replace them with yours.</p>
+  <header class="top">
+    <div>
+      <h1 data-i18n="title">Buy-In Yield Calculator</h1>
+      <p class="sub" data-i18n="sub">Example numbers are filled in; replace them with yours.</p>
+    </div>
+    <div class="lang" role="group" aria-label="Language / 語言">
+      <button type="button" data-lang="zh" lang="zh-Hant">中文</button>
+      <button type="button" data-lang="en" lang="en">EN</button>
+    </div>
   </header>
 
   <form class="panel tick" id="fq" autocomplete="off">
-    <label for="q">TW stock / ETF code<input id="q" type="text" inputmode="text" placeholder="2330 or 0056" maxlength="10"></label>
-    <button class="btn" id="qGo" type="submit">Fill price &amp; dividend</button>
-    <p class="tick-out" id="qOut">Fills buy price (latest close) and annual dividend (cash paid in the last 12 months) on both calculator tabs, and loads the Stock detail tab. Data: FinMind.</p>
+    <label for="q"><span data-i18n="code">TW stock / ETF code</span><input id="q" type="text" inputmode="text" data-i18n-ph="codePh" placeholder="2330 or 0056" maxlength="10"></label>
+    <button class="btn" id="qGo" type="submit" data-i18n="fill">Fill price &amp; dividend</button>
+    <p class="tick-out" id="qOut"></p>
   </form>
 
   <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-buyin" aria-controls="pane-buyin" aria-selected="true">Buy-in calculator</button>
-    <button class="tab" role="tab" id="tab-recommended" aria-controls="pane-recommended" aria-selected="false">Recommended price</button>
-    <button class="tab" role="tab" id="tab-detail" aria-controls="pane-detail" aria-selected="false">Stock detail</button>
+    <button class="tab" role="tab" id="tab-buyin" aria-controls="pane-buyin" aria-selected="true" data-i18n="tabBuyin">Buy-in calculator</button>
+    <button class="tab" role="tab" id="tab-recommended" aria-controls="pane-recommended" aria-selected="false" data-i18n="tabRec">Recommended price</button>
+    <button class="tab" role="tab" id="tab-detail" aria-controls="pane-detail" aria-selected="false" data-i18n="tabDetail">Stock detail</button>
   </div>
 
   <div class="grid" id="pane-buyin" role="tabpanel" aria-labelledby="tab-buyin">
     <form class="panel" id="f" autocomplete="off">
       <fieldset>
-        <legend>Current holding</legend>
+        <legend data-i18n="holding">Current holding</legend>
         <div class="row2">
-          <label for="s">Shares<input id="s" type="number" inputmode="decimal" min="0" step="any" value="100"></label>
-          <label for="a">Avg price<input id="a" type="number" inputmode="decimal" min="0" step="any" value="50"></label>
+          <label for="s"><span data-i18n="shares">Shares</span><input id="s" type="number" inputmode="decimal" min="0" step="any" value="100"></label>
+          <label for="a"><span data-i18n="avgPrice">Avg price</span><input id="a" type="number" inputmode="decimal" min="0" step="any" value="50"></label>
         </div>
       </fieldset>
       <fieldset>
-        <legend>Planned buy-in</legend>
+        <legend data-i18n="planned">Planned buy-in</legend>
         <div class="row2">
-          <label for="b">Shares<input id="b" type="number" inputmode="decimal" min="0" step="any" value="50"></label>
-          <label for="p">Buy price<input id="p" type="number" inputmode="decimal" min="0" step="any" value="40"></label>
+          <label for="b"><span data-i18n="shares">Shares</span><input id="b" type="number" inputmode="decimal" min="0" step="any" value="50"></label>
+          <label for="p"><span data-i18n="buyPrice">Buy price</span><input id="p" type="number" inputmode="decimal" min="0" step="any" value="40"></label>
         </div>
       </fieldset>
       <fieldset>
-        <legend>Dividend</legend>
-        <label for="d">Annual dividend per share<input id="d" type="number" inputmode="decimal" min="0" step="any" value="2"></label>
-        <p class="hint">Quarterly payer? Enter the quarterly amount × 4.</p>
+        <legend data-i18n="dividend">Dividend</legend>
+        <label for="d"><span data-i18n="annDiv">Annual dividend per share</span><input id="d" type="number" inputmode="decimal" min="0" step="any" value="2"></label>
+        <p class="hint" data-i18n="quarterly">Quarterly payer? Enter the quarterly amount × 4.</p>
       </fieldset>
       <p class="err" id="err" hidden></p>
     </form>
 
     <section class="panel" aria-live="polite">
       <div class="headline">
-        <div><div class="lbl">New avg price</div><div class="big" id="oNewAvg">–</div></div>
+        <div><div class="lbl" data-i18n="newAvg">New avg price</div><div class="big" id="oNewAvg">–</div></div>
         <span class="chip" id="oChip">–</span>
       </div>
 
       <div class="scale" id="scale" aria-hidden="true">
         <div class="track"></div>
         <div class="arrow" id="arrow"></div>
-        <div class="mk mk-old" id="mkOld"><span>old avg</span><span id="mkOldV"></span><span class="dot"></span></div>
-        <div class="mk mk-buy below" id="mkBuy"><span class="dot"></span><span id="mkBuyV"></span><span>buy</span></div>
-        <div class="mk mk-new" id="mkNew"><span>new avg</span><span id="mkNewV"></span><span class="dot"></span></div>
+        <div class="mk mk-old" id="mkOld"><span data-i18n="mkOld">old avg</span><span id="mkOldV"></span><span class="dot"></span></div>
+        <div class="mk mk-buy below" id="mkBuy"><span class="dot"></span><span id="mkBuyV"></span><span data-i18n="mkBuy">buy</span></div>
+        <div class="mk mk-new" id="mkNew"><span data-i18n="mkNew">new avg</span><span id="mkNewV"></span><span class="dot"></span></div>
       </div>
 
-      <h2>Dividend yield</h2>
+      <h2 data-i18n="divYield">Dividend yield</h2>
       <div class="yields">
-        <div class="y"><span class="lbl">On old avg</span><span class="v" id="yOld">–</span><span class="d flat">&nbsp;</span></div>
-        <div class="y main"><span class="lbl">On new avg</span><span class="v" id="yNew">–</span><span class="d" id="yDelta">–</span></div>
-        <div class="y"><span class="lbl">At buy price</span><span class="v" id="yBuy">–</span><span class="d flat">yield on this lot</span></div>
+        <div class="y"><span class="lbl" data-i18n="onOld">On old avg</span><span class="v" id="yOld">–</span><span class="d flat">&nbsp;</span></div>
+        <div class="y main"><span class="lbl" data-i18n="onNew">On new avg</span><span class="v" id="yNew">–</span><span class="d" id="yDelta">–</span></div>
+        <div class="y"><span class="lbl" data-i18n="atBuy">At buy price</span><span class="v" id="yBuy">–</span><span class="d flat" data-i18n="thisLot">yield on this lot</span></div>
       </div>
 
       <div class="tbl">
         <table>
-          <thead><tr><th></th><th>Before</th><th>After</th><th>Change</th></tr></thead>
+          <thead><tr><th></th><th data-i18n="before">Before</th><th data-i18n="after">After</th><th data-i18n="change">Change</th></tr></thead>
           <tbody>
-            <tr><td>Shares</td><td id="t1a"></td><td id="t1b"></td><td id="t1c"></td></tr>
-            <tr><td>Avg price</td><td id="t2a"></td><td id="t2b"></td><td id="t2c"></td></tr>
-            <tr><td>Total cost</td><td id="t3a"></td><td id="t3b"></td><td id="t3c"></td></tr>
-            <tr><td>Annual dividends</td><td id="t4a"></td><td id="t4b"></td><td id="t4c"></td></tr>
+            <tr><td data-i18n="shares">Shares</td><td id="t1a"></td><td id="t1b"></td><td id="t1c"></td></tr>
+            <tr><td data-i18n="avgPrice">Avg price</td><td id="t2a"></td><td id="t2b"></td><td id="t2c"></td></tr>
+            <tr><td data-i18n="totalCost">Total cost</td><td id="t3a"></td><td id="t3b"></td><td id="t3c"></td></tr>
+            <tr><td data-i18n="annDivs">Annual dividends</td><td id="t4a"></td><td id="t4b"></td><td id="t4c"></td></tr>
           </tbody>
         </table>
       </div>
@@ -210,73 +222,73 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   <div class="grid" id="pane-recommended" role="tabpanel" aria-labelledby="tab-recommended" hidden>
     <form class="panel" id="f2" autocomplete="off">
       <fieldset>
-        <legend>Target</legend>
-        <label for="t">Target dividend yield (%)<input id="t" type="number" inputmode="decimal" min="0" step="any" value="6"></label>
-        <label for="d2">Annual dividend per share<input id="d2" type="number" inputmode="decimal" min="0" step="any" value="2"></label>
+        <legend data-i18n="target">Target</legend>
+        <label for="t"><span data-i18n="targetYield">Target dividend yield (%)</span><input id="t" type="number" inputmode="decimal" min="0" step="any" value="6"></label>
+        <label for="d2"><span data-i18n="annDiv">Annual dividend per share</span><input id="d2" type="number" inputmode="decimal" min="0" step="any" value="2"></label>
       </fieldset>
       <fieldset>
-        <legend>Current holding</legend>
+        <legend data-i18n="holding">Current holding</legend>
         <div class="row2">
-          <label for="s2">Shares<input id="s2" type="number" inputmode="decimal" min="0" step="any" value="0"></label>
-          <label for="a2">Avg price<input id="a2" type="number" inputmode="decimal" min="0" step="any" value="0"></label>
+          <label for="s2"><span data-i18n="shares">Shares</span><input id="s2" type="number" inputmode="decimal" min="0" step="any" value="0"></label>
+          <label for="a2"><span data-i18n="avgPrice">Avg price</span><input id="a2" type="number" inputmode="decimal" min="0" step="any" value="0"></label>
         </div>
       </fieldset>
       <fieldset>
-        <legend>Planned buy-in</legend>
+        <legend data-i18n="planned">Planned buy-in</legend>
         <div class="row2">
-          <label for="b2">Shares<input id="b2" type="number" inputmode="decimal" min="0" step="any" value="1000"></label>
-          <label for="p2">Buy price<input id="p2" type="number" inputmode="decimal" min="0" step="any" value="40"></label>
+          <label for="b2"><span data-i18n="shares">Shares</span><input id="b2" type="number" inputmode="decimal" min="0" step="any" value="1000"></label>
+          <label for="p2"><span data-i18n="buyPrice">Buy price</span><input id="p2" type="number" inputmode="decimal" min="0" step="any" value="40"></label>
         </div>
-        <button type="button" class="linkbtn" id="copy">Copy values from Buy-in calculator</button>
+        <button type="button" class="linkbtn" id="copy" data-i18n="copy">Copy values from Buy-in calculator</button>
       </fieldset>
       <p class="err" id="err2" hidden></p>
     </form>
 
     <section class="panel" aria-live="polite">
       <div class="headline">
-        <div><div class="lbl">Max buy price for <span id="rT">–</span> yield</div><div class="big-rec" id="rMax">–</div></div>
+        <div><div class="lbl" id="rMaxL">–</div><div class="big-rec" id="rMax">–</div></div>
         <span class="chip" id="rMaxD">–</span>
       </div>
-      <p class="target">Dividend ÷ target yield. Buy at or below this and the new shares earn the target on their own. Your whole position needs an avg price of at most <b id="rAvg">–</b>.</p>
+      <p class="target"><span data-i18n="recExplain">Dividend ÷ target yield. Buy at or below this and the new shares earn the target on their own. Your whole position needs an avg price of at most</span> <b id="rAvg">–</b><span data-i18n="period">.</span></p>
 
-      <h2>To bring your whole position to the target</h2>
+      <h2 data-i18n="wholePos">To bring your whole position to the target</h2>
       <div class="rec">
-        <div class="y"><span class="lbl">Buy price needed</span><span class="v" id="rNeed">–</span><span class="d" id="rNeedD">&nbsp;</span><span class="note">For your planned shares, buy at or below this price.</span></div>
-        <div class="y"><span class="lbl">Shares needed</span><span class="v" id="rSh">–</span><span class="d" id="rShD">&nbsp;</span><span class="note">At your buy price, buy at least this many shares.</span></div>
-        <div class="y"><span class="lbl">Current yield</span><span class="v" id="rCur">–</span><span class="d" id="rCurD">&nbsp;</span><span class="note">Dividend ÷ your current avg price.</span></div>
+        <div class="y"><span class="lbl" data-i18n="needBuy">Buy price needed</span><span class="v" id="rNeed">–</span><span class="d" id="rNeedD">&nbsp;</span><span class="note" data-i18n="needBuyN">For your planned shares, buy at or below this price.</span></div>
+        <div class="y"><span class="lbl" data-i18n="needSh">Shares needed</span><span class="v" id="rSh">–</span><span class="d" id="rShD">&nbsp;</span><span class="note" data-i18n="needShN">At your buy price, buy at least this many shares.</span></div>
+        <div class="y"><span class="lbl" data-i18n="curYield">Current yield</span><span class="v" id="rCur">–</span><span class="d" id="rCurD">&nbsp;</span><span class="note" data-i18n="curYieldN">Dividend ÷ your current avg price.</span></div>
       </div>
     </section>
   </div>
 
   <section class="panel" id="pane-detail" role="tabpanel" aria-labelledby="tab-detail" aria-live="polite" hidden>
-    <p class="det-empty" id="detEmpty">Enter a TW stock or ETF code above and press the button to see its details here.</p>
+    <p class="det-empty" id="detEmpty" data-i18n="detEmpty">Enter a TW stock or ETF code above and press the button to see its details here.</p>
     <div class="det" id="det" hidden>
       <div class="det-head"><span class="det-name" id="dName"></span><span class="det-sub" id="dSub"></span></div>
       <div class="kpis">
-        <div class="y main"><span class="lbl">Current price</span><span class="v" id="dPx"></span><span class="d" id="dPxD"></span></div>
-        <div class="y"><span class="lbl">Max buy for <span id="dTgt">6</span>% yield</span>
-          <span class="step"><button type="button" id="dTgtDn" aria-label="Lower target yield by 0.5%">−</button><span id="dTgtV">6.0%</span><button type="button" id="dTgtUp" aria-label="Raise target yield by 0.5%">+</button></span>
-          <span class="v" id="dMax"></span><span class="d" id="dMaxD"></span><span class="note">Last 12 months' cash dividend ÷ <span id="dTgtN">6</span>%</span></div>
-        <div class="y"><span class="lbl">Dividend yield</span><span class="v" id="dYld"></span><span class="note" id="dYldN"></span></div>
-        <div class="y"><span class="lbl">P/E ratio</span><span class="v" id="dPe"></span><span class="note" id="dPeN"></span></div>
-        <div class="y"><span class="lbl">Avg annual dividend</span><span class="v" id="dAvg"></span><span class="note" id="dAvgN"></span></div>
+        <div class="y main"><span class="lbl" data-i18n="curPrice">Current price</span><span class="v" id="dPx"></span><span class="d" id="dPxD"></span></div>
+        <div class="y"><span class="lbl" id="dTgtL"></span>
+          <span class="step"><button type="button" id="dTgtDn" data-i18n-aria="tgtDn">−</button><span id="dTgtV">6.0%</span><button type="button" id="dTgtUp" data-i18n-aria="tgtUp">+</button></span>
+          <span class="v" id="dMax"></span><span class="d" id="dMaxD"></span><span class="note" id="dTgtN"></span></div>
+        <div class="y"><span class="lbl" data-i18n="divYield">Dividend yield</span><span class="v" id="dYld"></span><span class="note" id="dYldN"></span></div>
+        <div class="y"><span class="lbl" data-i18n="pe">P/E ratio</span><span class="v" id="dPe"></span><span class="note" id="dPeN"></span></div>
+        <div class="y"><span class="lbl" data-i18n="avgAnn">Avg annual dividend</span><span class="v" id="dAvg"></span><span class="note" id="dAvgN"></span></div>
       </div>
       <div>
-        <h2>All-time price range</h2>
+        <h2 data-i18n="range">All-time price range</h2>
         <div class="range" aria-hidden="true">
           <div class="track"></div>
           <div class="now" id="dNow"><span id="dNowV"></span></div>
-          <div class="end" style="left:0">low <b id="dLo"></b><br><span id="dLoD"></span></div>
-          <div class="end" style="right:0;text-align:right">high <b id="dHi"></b><br><span id="dHiD"></span></div>
+          <div class="end" style="left:0"><span data-i18n="low">low</span> <b id="dLo"></b><br><span id="dLoD"></span></div>
+          <div class="end" style="right:0;text-align:right"><span data-i18n="high">high</span> <b id="dHi"></b><br><span id="dHiD"></span></div>
         </div>
         <p class="hint" id="dRangeN"></p>
       </div>
       <div>
-        <h2>Dividend history</h2>
-        <div class="hist-head"><span class="lbl">Paying dividends for</span><span class="hist-v" id="dYrs"></span><span class="note" id="dYrsN"></span></div>
+        <h2 data-i18n="history">Dividend history</h2>
+        <div class="hist-head"><span class="lbl" data-i18n="payingFor">Paying dividends for</span><span class="hist-v" id="dYrs"></span><span class="note" id="dYrsN"></span></div>
         <div class="bars" id="dBars" role="img"></div>
         <div class="bars-x"><span id="dX0"></span><span id="dX1"></span></div>
-        <p class="bar-tip" id="dTip">Hover or tap a bar for the year's total. Labels show that year's dividend ÷ its average closing price.</p>
+        <p class="bar-tip" id="dTip"></p>
       </div>
     </div>
   </section>
@@ -285,12 +297,119 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 <script>
 (function () {
   const $ = id => document.getElementById(id);
+
+  // ---- locale: English / Traditional Chinese, remembered in localStorage ----
+  const I18N = {
+    en: {
+      title: "Buy-In Yield Calculator", sub: "Example numbers are filled in; replace them with yours.",
+      code: "TW stock / ETF code", codePh: "2330 or 0056", fill: "Fill price & dividend",
+      tickIntro: "Fills buy price (latest close) and annual dividend (cash paid in the last 12 months) on both calculator tabs, and loads the Stock detail tab. Data: FinMind.",
+      tickBad: "Enter a TW code like 2330 or 0056.", tickLoading: "Looking up {0}…", tickFail: "Lookup failed: {0}. Enter numbers by hand.",
+      tickClose: " · close ", tickDiv: ") · dividend ", tickPay: " ({0} payout{1} in 12 mo) · yield ",
+      tabBuyin: "Buy-in calculator", tabRec: "Recommended price", tabDetail: "Stock detail",
+      holding: "Current holding", planned: "Planned buy-in", dividend: "Dividend",
+      shares: "Shares", avgPrice: "Avg price", buyPrice: "Buy price", annDiv: "Annual dividend per share",
+      quarterly: "Quarterly payer? Enter the quarterly amount × 4.",
+      newAvg: "New avg price", mkOld: "old avg", mkBuy: "buy", mkNew: "new avg",
+      divYield: "Dividend yield", onOld: "On old avg", onNew: "On new avg", atBuy: "At buy price", thisLot: "yield on this lot",
+      before: "Before", after: "After", change: "Change", totalCost: "Total cost", annDivs: "Annual dividends",
+      errNum: "Enter a number of 0 or more in every field.", errShares: "Total shares must be above 0.",
+      noChange: "no change", rises: "▲ rises ", falls: "▼ falls ", pts: " pts",
+      target: "Target", targetYield: "Target dividend yield (%)", copy: "Copy values from Buy-in calculator",
+      maxFor: "Max buy price for {0} yield",
+      recExplain: "Dividend ÷ target yield. Buy at or below this and the new shares earn the target on their own. Your whole position needs an avg price of at most", period: ".",
+      wholePos: "To bring your whole position to the target",
+      needBuy: "Buy price needed", needBuyN: "For your planned shares, buy at or below this price.",
+      needSh: "Shares needed", needShN: "At your buy price, buy at least this many shares.",
+      curYield: "Current yield", curYieldN: "Dividend ÷ your current avg price.",
+      needDiv: "Enter a dividend above 0", needTgt: "Enter a target above 0", noHolding: "No holding",
+      atTarget: "✓ at or above target", belowTarget: "✗ {0} pts below target", fits: "✓ your buy price fits", tooHigh: "✗ your buy price is {0} too high",
+      already: "✓ already at target", anyPrice: "Any price", enterPlanned: "Enter planned shares", unreachable: "Not reachable", buyMore: "✗ buy more shares",
+      anyAmount: "Any amount", mustAtOrBelow: "✗ buy price must be at or below {0}", mustBelow: "✗ buy price must be below {0}",
+      covers: "✓ your plan covers it", moreThan: "✗ {0} more than planned",
+      detEmpty: "Enter a TW stock or ETF code above and press the button to see its details here.",
+      curPrice: "Current price", closeOn: " · close ", maxBuyFor: "Max buy for {0}% yield", maxBuyN: "Last 12 months' cash dividend ÷ {0}%",
+      tgtDn: "Lower target yield by 0.5%", tgtUp: "Raise target yield by 0.5%",
+      nowBelow: "✓ now {0} below it", nowAbove: "✗ now {0} ({1}) above", noDiv12: "No dividend in the last 12 months", na: "n/a",
+      yldN: "{0} cash in the last 12 months ({1} payout{2}) ÷ price",
+      pe: "P/E ratio", peNone: "Not published for this code (ETFs have none).", peOk: "Price ÷ last 4 quarters' EPS", peNeg: "Last 4 quarters' EPS is negative",
+      avgAnn: "Avg annual dividend", avgAnnN: "Last 5 full years ({0}–{1}); all {2} paying years: {3}",
+      range: "All-time price range", low: "low", high: "high", now: "now ",
+      rangeN: "Daily high/low since {0}, not adjusted for dividends. ", rangeAdj: "Prices and dividends before {0} are scaled for par value changes / splits. ",
+      rangeNow: "Now {0} below the high, {1} above the low.",
+      history: "Dividend history", payingFor: "Paying dividends for", yrs: "{0} yr{1}", none: "None", noDivData: "No cash dividends in the data.",
+      yrsN: "Since {0} · {1} payouts · {2}. Counted from the earliest payout in FinMind's data.", noRecord: "no record for {0}", nYears: "{0} years", everyYear: "paid every year",
+      tipIntro: "Hover or tap a bar for the year's total. Labels show that year's dividend ÷ its average closing price.",
+      soFar: " (so far)", soFarShort: " so far", divAvgAria: "Cash dividend and yield on that year's average price, {0} to {1}",
+      barTxt: "{0}: {1}", barYld: ", {0} of avg price {1}", tipAvg: " ÷ avg price ", tipYld: " yield", listSep: ", ",
+      twse: "TWSE", tpex: "TPEx"
+    },
+    zh: {
+      title: "加碼殖利率計算機", sub: "已填入範例數字，請換成你自己的。",
+      code: "台股 / ETF 代號", codePh: "例如 2330 或 0056", fill: "帶入股價與股利",
+      tickIntro: "將買進價（最新收盤價）與年股利（近 12 個月現金股利）帶入兩個試算分頁，並載入個股資訊分頁。資料來源：FinMind。",
+      tickBad: "請輸入台股代號，例如 2330 或 0056。", tickLoading: "查詢 {0} 中…", tickFail: "查詢失敗：{0}。請手動輸入數字。",
+      tickClose: " · 收盤 ", tickDiv: "）· 股利 ", tickPay: "（近 12 個月配 {0} 次）· 殖利率 ",
+      tabBuyin: "加碼試算", tabRec: "建議買價", tabDetail: "個股資訊",
+      holding: "目前持股", planned: "計畫加碼", dividend: "股利",
+      shares: "股數", avgPrice: "均價", buyPrice: "買進價", annDiv: "每股年股利",
+      quarterly: "季配息？請輸入每季金額 × 4。",
+      newAvg: "新均價", mkOld: "舊均價", mkBuy: "買進", mkNew: "新均價",
+      divYield: "殖利率", onOld: "以舊均價", onNew: "以新均價", atBuy: "以買進價", thisLot: "這次買進的殖利率",
+      before: "加碼前", after: "加碼後", change: "變化", totalCost: "總成本", annDivs: "年股利總額",
+      errNum: "每個欄位請輸入 0 或以上的數字。", errShares: "總股數必須大於 0。",
+      noChange: "沒有變化", rises: "▲ 上升 ", falls: "▼ 下降 ", pts: " 個百分點",
+      target: "目標", targetYield: "目標殖利率（%）", copy: "從加碼試算帶入數值",
+      maxFor: "達到 {0} 殖利率的最高買價",
+      recExplain: "股利 ÷ 目標殖利率。在此價格以下買進，新買的股票本身就能達到目標。整體持股的均價需不高於", period: "。",
+      wholePos: "讓整體持股達到目標",
+      needBuy: "所需買價", needBuyN: "以計畫股數，買價需不高於此。",
+      needSh: "所需股數", needShN: "以你的買進價，至少要買這麼多股。",
+      curYield: "目前殖利率", curYieldN: "股利 ÷ 目前均價。",
+      needDiv: "請輸入大於 0 的股利", needTgt: "請輸入大於 0 的目標", noHolding: "尚無持股",
+      atTarget: "✓ 已達目標", belowTarget: "✗ 低於目標 {0} 個百分點", fits: "✓ 你的買進價符合", tooHigh: "✗ 你的買進價高了 {0}",
+      already: "✓ 已達目標", anyPrice: "任何價格", enterPlanned: "請輸入計畫股數", unreachable: "無法達到", buyMore: "✗ 需買更多股",
+      anyAmount: "任何數量", mustAtOrBelow: "✗ 買進價需不高於 {0}", mustBelow: "✗ 買進價需低於 {0}",
+      covers: "✓ 計畫股數足夠", moreThan: "✗ 比計畫多 {0} 股",
+      detEmpty: "在上方輸入台股或 ETF 代號並按下按鈕，即可在此查看個股資訊。",
+      curPrice: "目前股價", closeOn: " · 收盤 ", maxBuyFor: "殖利率 {0}% 的最高買價", maxBuyN: "近 12 個月現金股利 ÷ {0}%",
+      tgtDn: "目標殖利率減 0.5%", tgtUp: "目標殖利率加 0.5%",
+      nowBelow: "✓ 目前低於此價 {0}", nowAbove: "✗ 目前高於此價 {0}（{1}）", noDiv12: "近 12 個月沒有配息", na: "無",
+      yldN: "近 12 個月現金股利 {0}（配 {1} 次）÷ 股價",
+      pe: "本益比", peNone: "此代號沒有公布本益比（ETF 沒有）。", peOk: "股價 ÷ 近 4 季 EPS", peNeg: "近 4 季 EPS 為負",
+      avgAnn: "平均年股利", avgAnnN: "近 5 個完整年度（{0}–{1}）；全部 {2} 個配息年度：{3}",
+      range: "歷史價格區間", low: "最低", high: "最高", now: "目前 ",
+      rangeN: "自 {0} 起的每日最高 / 最低價，未做除息調整。", rangeAdj: "{0} 之前的股價與股利已依面額變更 / 分割調整。",
+      rangeNow: "目前比最高價低 {0}，比最低價高 {1}。",
+      history: "股利歷史", payingFor: "配息年數", yrs: "{0} 年", none: "無", noDivData: "資料中沒有現金股利。",
+      yrsN: "自 {0} 年起 · 共 {1} 次 · {2}。從 FinMind 資料中最早一次配息起算。", noRecord: "{0} 無紀錄", nYears: "{0} 個年度", everyYear: "每年都有配息",
+      tipIntro: "將游標移到或點選長條，查看當年合計。標籤為當年股利 ÷ 當年平均收盤價。",
+      soFar: "（至今）", soFarShort: " 至今", divAvgAria: "每年現金股利與以當年均價計算的殖利率，{0} 至 {1}",
+      barTxt: "{0}：{1}", barYld: "，為均價 {1} 的 {0}", tipAvg: " ÷ 均價 ", tipYld: " 殖利率", listSep: "、",
+      twse: "上市", tpex: "上櫃"
+    }
+  };
+  let lang;
+  try { lang = localStorage.getItem("lang"); } catch (e) {}
+  if (!I18N[lang]) lang = /^en/i.test(navigator.language || "") ? "en" : "zh";
+  const t = (k, ...a) => (I18N[lang][k] ?? I18N.en[k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i]);
+  const plural = n => lang === "en" && n !== 1 ? "s" : "";
+  function applyStatic() {
+    document.documentElement.lang = lang === "zh" ? "zh-Hant-TW" : "en";
+    document.title = t("title");
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+    document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+    document.querySelectorAll("[data-lang]").forEach(el => el.setAttribute("aria-pressed", el.dataset.lang === lang));
+  }
+
   const ids = ["s", "a", "b", "p", "d"];
   const num = v => new Intl.NumberFormat(undefined, { maximumFractionDigits: 4 }).format(v);
   const money = v => new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(v);
   const pct = v => (v * 100).toFixed(2) + "%";
   const signed = (v, f) => (v > 0 ? "+" : v < 0 ? "−" : "±") + f(Math.abs(v));
   const cls = (el, v, invert) => { el.classList.remove("up", "down", "flat"); el.classList.add(v === 0 ? "flat" : (v > 0) !== !!invert ? "up" : "down"); };
+  const bold = s => { const x = document.createElement("b"); x.textContent = s; return x; };
 
   // pure calc
   function calc(s, a, b, p, d) {
@@ -308,15 +427,15 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   function render() {
     const v = ids.map(id => parseFloat($(id).value));
     const err = $("err");
-    if (v.some(x => !isFinite(x) || x < 0)) { err.textContent = "Enter a number of 0 or more in every field."; err.hidden = false; return; }
+    if (v.some(x => !isFinite(x) || x < 0)) { err.textContent = t("errNum"); err.hidden = false; return; }
     const [s, a, b, p, d] = v;
-    if (s + b <= 0) { err.textContent = "Total shares must be above 0."; err.hidden = false; return; }
+    if (s + b <= 0) { err.textContent = t("errShares"); err.hidden = false; return; }
     err.hidden = true;
     const r = calc(s, a, b, p, d);
 
     $("oNewAvg").textContent = money(r.avg1);
     const chip = $("oChip");
-    chip.textContent = r.dAvg === 0 ? "no change" : (r.dAvg > 0 ? "▲ rises " : "▼ falls ") + money(Math.abs(r.dAvg)) + " (" + pct(Math.abs(r.dAvgPct)) + ")";
+    chip.textContent = r.dAvg === 0 ? t("noChange") : t(r.dAvg > 0 ? "rises" : "falls") + money(Math.abs(r.dAvg)) + " (" + pct(Math.abs(r.dAvgPct)) + ")";
     cls(chip, r.dAvg);
 
     // scale: position old avg, buy, new avg
@@ -339,7 +458,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     $("yNew").textContent = pct(r.y1);
     $("yBuy").textContent = pct(r.yb);
     const dy = r.y1 - r.y0;
-    $("yDelta").textContent = signed(dy * 100, x => x.toFixed(2)) + " pts";
+    $("yDelta").textContent = signed(dy * 100, x => x.toFixed(2)) + t("pts");
     cls($("yDelta"), dy, true);
 
     const rows = [
@@ -373,7 +492,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   function renderTarget() {
     const v = ["s2", "a2", "b2", "p2", "d2"].map(id => parseFloat($(id).value));
     const err = $("err2");
-    if (v.some(x => !isFinite(x) || x < 0)) { err.textContent = "Enter a number of 0 or more in every field."; err.hidden = false; return; }
+    if (v.some(x => !isFinite(x) || x < 0)) { err.textContent = t("errNum"); err.hidden = false; return; }
     err.hidden = true;
     const [s, a, b, p, d] = v;
     const tv = parseFloat($("t").value);
@@ -381,41 +500,41 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     if (!isFinite(tv) || tv <= 0 || d <= 0) {
       ids2.forEach(id => $(id).textContent = "–");
       $("rCur").textContent = "–"; $("rCurD").textContent = "";
-      $("rT").textContent = "–";
-      $("rMaxD").textContent = d <= 0 ? "Enter a dividend above 0" : "Enter a target above 0";
+      $("rMaxL").textContent = t("maxFor", "–");
+      $("rMaxD").textContent = d <= 0 ? t("needDiv") : t("needTgt");
       return;
     }
     const r = target(s, a, b, p, d, tv / 100);
     const mark = (el, good, txt) => { el.textContent = txt; el.classList.remove("ok", "no", "flat"); el.classList.add(good ? "ok" : "no"); };
-    $("rT").textContent = tv + "%";
+    $("rMaxL").textContent = t("maxFor", tv + "%");
     $("rAvg").textContent = money(r.avgT);
     $("rMax").textContent = money(r.maxBuy);
-    $("rCur").textContent = s > 0 && a > 0 ? pct(d / a) : "No holding";
-    if (!(s > 0 && a > 0)) { $("rCurD").textContent = "\u00a0"; $("rCurD").className = "d flat"; }
-    else mark($("rCurD"), d / a >= tv / 100, d / a >= tv / 100 ? "✓ at or above target" : "✗ " + ((tv / 100 - d / a) * 100).toFixed(2) + " pts below target");
-    mark($("rMaxD"), p <= r.maxBuy, p <= r.maxBuy ? "✓ your buy price fits" : "✗ your buy price is " + money(p - r.maxBuy) + " too high");
+    $("rCur").textContent = s > 0 && a > 0 ? pct(d / a) : t("noHolding");
+    if (!(s > 0 && a > 0)) { $("rCurD").textContent = " "; $("rCurD").className = "d flat"; }
+    else mark($("rCurD"), d / a >= tv / 100, d / a >= tv / 100 ? t("atTarget") : t("belowTarget", ((tv / 100 - d / a) * 100).toFixed(2)));
+    mark($("rMaxD"), p <= r.maxBuy, p <= r.maxBuy ? t("fits") : t("tooHigh", money(p - r.maxBuy)));
 
     if (s > 0 && a <= r.avgT) {
-      mark($("rNeedD"), true, "✓ already at target");
-      $("rNeed").textContent = b > 0 ? "≤ " + money(r.needBuy) : "Any price";
+      mark($("rNeedD"), true, t("already"));
+      $("rNeed").textContent = b > 0 ? "≤ " + money(r.needBuy) : t("anyPrice");
     } else if (b <= 0) {
       $("rNeed").textContent = "–";
-      $("rNeedD").textContent = "Enter planned shares"; $("rNeedD").className = "d flat";
+      $("rNeedD").textContent = t("enterPlanned"); $("rNeedD").className = "d flat";
     } else if (r.needBuy <= 0) {
-      $("rNeed").textContent = "Not reachable";
-      mark($("rNeedD"), false, "✗ buy more shares");
+      $("rNeed").textContent = t("unreachable");
+      mark($("rNeedD"), false, t("buyMore"));
     } else {
       $("rNeed").textContent = money(r.needBuy);
-      mark($("rNeedD"), p <= r.needBuy, p <= r.needBuy ? "✓ your buy price fits" : "✗ your buy price is " + money(p - r.needBuy) + " too high");
+      mark($("rNeedD"), p <= r.needBuy, p <= r.needBuy ? t("fits") : t("tooHigh", money(p - r.needBuy)));
     }
 
-    if (s === 0 && isFinite(r.shares)) { $("rSh").textContent = "Any amount"; mark($("rShD"), true, "✓ your buy price fits"); }
-    else if (r.shares === 0) { $("rSh").textContent = "0"; mark($("rShD"), true, "✓ already at target"); }
-    else if (!isFinite(r.shares)) { $("rSh").textContent = "Not reachable"; mark($("rShD"), false, (s === 0 ? "✗ buy price must be at or below " : "✗ buy price must be below ") + money(r.avgT)); }
+    if (s === 0 && isFinite(r.shares)) { $("rSh").textContent = t("anyAmount"); mark($("rShD"), true, t("fits")); }
+    else if (r.shares === 0) { $("rSh").textContent = "0"; mark($("rShD"), true, t("already")); }
+    else if (!isFinite(r.shares)) { $("rSh").textContent = t("unreachable"); mark($("rShD"), false, t(s === 0 ? "mustAtOrBelow" : "mustBelow", money(r.avgT))); }
     else {
       const need = Math.ceil(r.shares - 1e-9);
       $("rSh").textContent = num(need);
-      mark($("rShD"), b >= need, b >= need ? "✓ your plan covers it" : "✗ " + num(need - b) + " more than planned");
+      mark($("rShD"), b >= need, b >= need ? t("covers") : t("moreThan", num(need - b)));
     }
   }
 
@@ -497,10 +616,11 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   }
 
   // target yield for the max-buy card, adjustable in 0.5% steps
-  let tgt = 6, detail = null;
+  let tgt = 6, detail = null, lastR = null;
   try { const v = parseFloat(localStorage.getItem("detTarget")); if (v >= 0.5 && v <= 30) tgt = v; } catch (e) {}
   function renderMax() {
-    $("dTgt").textContent = $("dTgtN").textContent = tgt;
+    $("dTgtL").textContent = t("maxBuyFor", tgt);
+    $("dTgtN").textContent = t("maxBuyN", tgt);
     $("dTgtV").textContent = tgt.toFixed(1) + "%";
     $("dTgtDn").disabled = tgt <= 0.5;
     if (!detail) return;
@@ -509,37 +629,35 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     if (d > 0) {
       $("dMax").textContent = money(+maxBuy.toFixed(2));
       const gap = close - maxBuy;
-      el.textContent = gap <= 0 ? "✓ now " + money(+(-gap).toFixed(2)) + " below it" : "✗ now " + money(+gap.toFixed(2)) + " (" + pct(gap / maxBuy) + ") above";
+      el.textContent = gap <= 0 ? t("nowBelow", money(+(-gap).toFixed(2))) : t("nowAbove", money(+gap.toFixed(2)), pct(gap / maxBuy));
       el.classList.add(gap <= 0 ? "ok" : "no");
-    } else { $("dMax").textContent = "n/a"; el.textContent = "No dividend in the last 12 months"; el.classList.add("flat"); }
+    } else { $("dMax").textContent = t("na"); el.textContent = t("noDiv12"); el.classList.add("flat"); }
   }
   [["dTgtDn", -0.5], ["dTgtUp", 0.5]].forEach(([id, step]) => $(id).addEventListener("click", () => {
     tgt = Math.min(30, Math.max(0.5, Math.round((tgt + step) * 2) / 2));
     try { localStorage.setItem("detTarget", tgt); } catch (e) {}
     renderMax();
   }));
-  renderMax();
 
   function renderDetail(r) {
     const d = +r.div.toFixed(3);
     $("detEmpty").hidden = true; $("det").hidden = false;
     $("dName").textContent = (r.name ? r.name + " " : "") + r.code;
-    $("dSub").textContent = [r.type === "tpex" ? "TPEx" : r.type === "twse" ? "TWSE" : r.type, r.industry].filter(Boolean).join(" · ");
+    $("dSub").textContent = [r.type === "tpex" || r.type === "twse" ? t(r.type) : r.type, r.industry].filter(Boolean).join(" · ");
     $("dPx").textContent = money(r.close);
     const ch = r.close - r.prev;
-    $("dPxD").textContent = signed(ch, money) + " (" + signed(r.prev ? ch / r.prev * 100 : 0, x => x.toFixed(2)) + "%) · close " + r.date;
+    $("dPxD").textContent = signed(ch, money) + " (" + signed(r.prev ? ch / r.prev * 100 : 0, x => x.toFixed(2)) + "%)" + t("closeOn") + r.date;
     cls($("dPxD"), ch);
     $("dYld").textContent = pct(r.close > 0 ? d / r.close : 0);
-    $("dYldN").textContent = money(d) + " cash in the last 12 months (" + r.n + " payout" + (r.n === 1 ? "" : "s") + ") ÷ price";
+    $("dYldN").textContent = t("yldN", money(d), r.n, plural(r.n));
 
     detail = { d, close: r.close };
     renderMax();
 
     // P/E as published by the exchange; 0 means trailing earnings are negative, none for ETFs
     const pe = r.per;
-    $("dPe").textContent = !pe ? "n/a" : pe.PER > 0 ? pe.PER.toFixed(2) : "n/a";
-    $("dPeN").textContent = !pe ? "Not published for this code (ETFs have none)." :
-      (pe.PER > 0 ? "Price ÷ last 4 quarters' EPS" : "Last 4 quarters' EPS is negative") + " · P/B " + pe.PBR.toFixed(2) + " · " + pe.date;
+    $("dPe").textContent = !pe ? t("na") : pe.PER > 0 ? pe.PER.toFixed(2) : t("na");
+    $("dPeN").textContent = !pe ? t("peNone") : t(pe.PER > 0 ? "peOk" : "peNeg") + " · P/B " + pe.PBR.toFixed(2) + " · " + pe.date;
 
     // annual totals by ex-dividend year
     const byYear = {};
@@ -547,27 +665,28 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
     const thisYear = new Date().getFullYear();
     if (!years.length) {
-      ["dYrs", "dAvg"].forEach(id => $(id).textContent = "None");
-      $("dYrsN").textContent = "No cash dividends in the data."; $("dAvgN").textContent = "";
+      ["dYrs", "dAvg"].forEach(id => $(id).textContent = t("none"));
+      $("dYrsN").textContent = t("noDivData"); $("dAvgN").textContent = "";
       $("dBars").replaceChildren(); $("dX0").textContent = $("dX1").textContent = ""; $("dTip").textContent = "";
     } else {
       const first = years[0], span = thisYear - first + 1;
       const missed = [];
       for (let y = first; y < thisYear; y++) if (!byYear[y]) missed.push(y);
-      $("dYrs").textContent = span + " yr" + (span === 1 ? "" : "s");
-      $("dYrsN").textContent = "Since " + first + " · " + r.pays.length + " payouts · " +
-        (missed.length ? "no record for " + (missed.length > 4 ? missed.length + " years" : missed.join(", ")) : "paid every year") + ". Counted from the earliest payout in FinMind's data.";
+      $("dYrs").textContent = t("yrs", span, plural(span));
+      $("dYrsN").textContent = t("yrsN", first, r.pays.length,
+        missed.length ? t("noRecord", missed.length > 4 ? t("nYears", missed.length) : missed.join(t("listSep"))) : t("everyYear"));
       const full = years.filter(y => y < thisYear), avg = ys => ys.reduce((a, y) => a + byYear[y], 0) / (ys.length || 1);
       const last5 = []; for (let y = thisYear - 5; y < thisYear; y++) last5.push(y);
       const a5 = last5.reduce((a, y) => a + (byYear[y] || 0), 0) / 5;
       $("dAvg").textContent = money(+a5.toFixed(3));
-      $("dAvgN").textContent = "Last 5 full years (" + last5[0] + "–" + last5[4] + "); all " + full.length + " paying years: " + money(+avg(full).toFixed(3));
+      $("dAvgN").textContent = t("avgAnnN", last5[0], last5[4], full.length, money(+avg(full).toFixed(3)));
 
       // bar chart, one bar per calendar year from first payout to now
       const all = []; for (let y = first; y <= thisYear; y++) all.push(y);
       const max = Math.max(...all.map(y => byYear[y] || 0));
       const tip = $("dTip");
-      $("dBars").setAttribute("aria-label", "Cash dividend and yield on that year's average price, " + first + " to " + thisYear);
+      tip.textContent = t("tipIntro");
+      $("dBars").setAttribute("aria-label", t("divAvgAria", first, thisYear));
       $("dBars").replaceChildren(...all.map(y => {
         const v = byYear[y] || 0, el = document.createElement("div");
         el.className = "bar" + (y === thisYear ? " partial" : "");
@@ -576,23 +695,23 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
         // yield on that year's average close
         const ac = r.avgClose[y], yl = v && ac ? v / ac : 0;
         if (yl) { const l = document.createElement("span"); l.className = "yl"; l.textContent = (yl * 100).toFixed(1) + "%"; el.append(l); }
-        const txt = y + ": " + (v ? money(+v.toFixed(3)) : "none") + (y === thisYear ? " (so far)" : "") + (yl ? ", " + pct(yl) + " of avg price " + money(+ac.toFixed(2)) : "");
+        const val = v ? money(+v.toFixed(3)) : t("none");
+        const txt = t("barTxt", y, val) + (y === thisYear ? t("soFar") : "") + (yl ? t("barYld", pct(yl), money(+ac.toFixed(2))) : "");
         el.title = txt; el.setAttribute("aria-label", txt);
         const showTip = () => {
-          const b = t => { const x = document.createElement("b"); x.textContent = t; return x; };
-          tip.replaceChildren(y + (y === thisYear ? " so far" : "") + ": ", b(v ? money(+v.toFixed(3)) : "none"));
-          if (yl) tip.append(" ÷ avg price ", b(money(+ac.toFixed(2))), " = ", b(pct(yl)), " yield");
+          tip.replaceChildren(y + (y === thisYear ? t("soFarShort") : "") + (lang === "zh" ? "：" : ": "), bold(val));
+          if (yl) tip.append(t("tipAvg"), bold(money(+ac.toFixed(2))), " = ", bold(pct(yl)), t("tipYld"));
         };
         el.addEventListener("mouseenter", showTip); el.addEventListener("focus", showTip); el.addEventListener("click", showTip);
         return el;
       }));
-      $("dX0").textContent = first; $("dX1").textContent = thisYear + " (so far)";
+      $("dX0").textContent = first; $("dX1").textContent = thisYear + t("soFar");
       // labels need ~30px per bar; on narrow screens rely on the tooltip
       const fit = () => $("dBars").classList.toggle("dense", $("dBars").clientWidth / all.length < 30);
       fit(); window.onresize = fit;
     }
 
-    // all-time range (daily high/low, not adjusted for dividends or splits)
+    // all-time range (daily high/low, not adjusted for dividends)
     const span = r.hi.max - r.lo.min || 1;
     $("dLo").textContent = money(r.lo.min); $("dLoD").textContent = r.lo.date;
     $("dHi").textContent = money(r.hi.max); $("dHiD").textContent = r.hi.date;
@@ -601,36 +720,61 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     // keep the "now" label inside the panel near either end
     $("dNowV").style.transform = "translateX(" + (at > 80 ? "-100%" : at < 20 ? "0" : "-50%") + ")";
     $("dNowV").style.left = at > 80 ? "100%" : at < 20 ? "0" : "50%";
-    $("dNowV").textContent = "now " + money(r.close);
-    $("dRangeN").textContent = "Daily high/low since " + r.since + ", not adjusted for dividends. " +
-      (r.pars.length ? "Prices and dividends before " + r.pars.map(p => p.date + " (×" + p.k + ")").join(", ") + " are scaled for par value changes / splits. " : "") + "Now " +
-      pct((r.hi.max - r.close) / r.hi.max) + " below the high, " + pct((r.close - r.lo.min) / r.lo.min) + " above the low.";
+    $("dNowV").textContent = t("now") + money(r.close);
+    $("dRangeN").textContent = t("rangeN", r.since) +
+      (r.pars.length ? t("rangeAdj", r.pars.map(p => p.date + " (×" + p.k + ")").join(t("listSep"))) : "") +
+      t("rangeNow", pct((r.hi.max - r.close) / r.hi.max), pct((r.close - r.lo.min) / r.lo.min));
+  }
+
+  // ticker status line; kept as state so a language switch can redraw it
+  let tick = { kind: "intro" };
+  function renderTick() {
+    const out = $("qOut");
+    out.className = "tick-out" + (tick.kind === "bad" || tick.kind === "fail" ? " no" : "");
+    if (tick.kind === "intro") out.textContent = t("tickIntro");
+    else if (tick.kind === "bad") out.textContent = t("tickBad");
+    else if (tick.kind === "loading") out.textContent = t("tickLoading", tick.code);
+    else if (tick.kind === "fail") out.textContent = t("tickFail", tick.msg);
+    else {
+      const r = tick.r, d = +r.div.toFixed(3);
+      out.replaceChildren((r.name ? r.name + " " : "") + r.code + t("tickClose"), bold(money(r.close)), (lang === "zh" ? "（" : " (") + r.date + t("tickDiv"), bold(money(d)),
+        t("tickPay", r.n, plural(r.n)), bold(pct(r.close > 0 ? d / r.close : 0)));
+    }
   }
 
   $("fq").addEventListener("submit", async e => {
     e.preventDefault();
-    const code = $("q").value.trim().toUpperCase(), out = $("qOut"), go = $("qGo");
-    if (!/^[0-9A-Z]{4,6}$/.test(code)) { out.className = "tick-out no"; out.textContent = "Enter a TW code like 2330 or 0056."; return; }
-    go.disabled = true; out.className = "tick-out"; out.textContent = "Looking up " + code + "…";
+    const code = $("q").value.trim().toUpperCase(), go = $("qGo");
+    if (!/^[0-9A-Z]{4,6}$/.test(code)) { tick = { kind: "bad" }; renderTick(); return; }
+    go.disabled = true; tick = { kind: "loading", code }; renderTick();
     try {
       const r = await lookup(code);
       const d = +r.div.toFixed(3);
       $("p").value = $("p2").value = r.close;
       $("d").value = $("d2").value = d;
+      lastR = r;
       render(); renderTarget(); renderDetail(r);
-      out.innerHTML = "";
-      const b = t => { const x = document.createElement("b"); x.textContent = t; return x; };
-      out.append((r.name ? r.name + " " : "") + code + " · close ", b(money(r.close)), " (" + r.date + ") · dividend ", b(money(d)),
-        " (" + r.n + " payout" + (r.n === 1 ? "" : "s") + " in 12 mo) · yield ", b(pct(r.close > 0 ? d / r.close : 0)));
+      tick = { kind: "ok", r }; renderTick();
       try { localStorage.setItem("ticker", code); } catch (e) {}
     } catch (err) {
-      out.className = "tick-out no"; out.textContent = "Lookup failed: " + err.message + ". Enter numbers by hand.";
+      tick = { kind: "fail", msg: err.message }; renderTick();
     } finally { go.disabled = false; }
   });
   try { $("q").value = localStorage.getItem("ticker") || ""; } catch (e) {}
 
-  render();
-  renderTarget();
+  // redraw everything in the chosen language
+  function renderAll() {
+    applyStatic();
+    render(); renderTarget(); renderMax(); renderTick();
+    if (lastR) renderDetail(lastR);
+  }
+  document.querySelectorAll("[data-lang]").forEach(el => el.addEventListener("click", () => {
+    lang = el.dataset.lang;
+    try { localStorage.setItem("lang", lang); } catch (e) {}
+    renderAll();
+  }));
+
+  renderAll();
 })();
 </script>
 </body>
