@@ -100,6 +100,21 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .split svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .split:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .split-n { margin: -12px 0 0; font-size: 13px; color: var(--muted); }
+.wl-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.wl-count { margin: 0; color: var(--muted); font-size: 13px; }
+.wl-act { display: flex; gap: 8px; flex-wrap: wrap; }
+.wl-act label.linkbtn { display: inline-block; color: var(--accent); font-size: 13px; }
+.wl-msg { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.wl-msg.no { color: var(--up); }
+.wl td { white-space: nowrap; }
+.wl tbody tr { cursor: pointer; }
+.wl tbody tr:hover td { background: var(--bg); }
+.wl td:first-child { font-family: var(--f-mono); color: var(--accent); font-weight: 600; }
+.wl td:nth-child(2) { font-family: var(--f-body); text-align: left; }
+.wl th:nth-child(2) { text-align: left; }
+.wl .open { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.wl .rm { font: 600 14px var(--f-body); color: var(--muted); background: none; border: 1px solid transparent; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; }
+.wl .rm:hover { color: var(--up); border-color: var(--line); }
 .det-sub { color: var(--muted); font-size: 13px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .kpis .y { align-content: start; }
@@ -162,6 +177,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     <button class="tab" role="tab" id="tab-buyin" aria-controls="pane-buyin" aria-selected="true" data-i18n="tabBuyin">Buy-in calculator</button>
     <button class="tab" role="tab" id="tab-recommended" aria-controls="pane-recommended" aria-selected="false" data-i18n="tabRec">Recommended price</button>
     <button class="tab" role="tab" id="tab-detail" aria-controls="pane-detail" aria-selected="false" data-i18n="tabDetail">Stock detail</button>
+    <button class="tab" role="tab" id="tab-watch" aria-controls="pane-watch" aria-selected="false" data-i18n="tabWatch">Watchlist</button>
   </div>
 
   <div class="grid" id="pane-buyin" role="tabpanel" aria-labelledby="tab-buyin">
@@ -297,6 +313,24 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       </div>
     </div>
   </section>
+
+  <section class="panel" id="pane-watch" role="tabpanel" aria-labelledby="tab-watch" hidden>
+    <div class="wl-bar">
+      <p class="wl-count" id="wlCount"></p>
+      <div class="wl-act">
+        <button type="button" class="linkbtn" id="wlExport" data-i18n="wlExport">Export JSON</button>
+        <label class="linkbtn" for="wlFile"><span data-i18n="wlImport">Import JSON</span><input type="file" id="wlFile" accept=".json,application/json" hidden></label>
+      </div>
+    </div>
+    <p class="wl-msg" id="wlMsg" hidden></p>
+    <p class="det-empty" id="wlEmpty" data-i18n="wlEmpty">Stocks you look up are added here automatically.</p>
+    <div class="tbl" id="wlWrap" hidden>
+      <table class="wl">
+        <thead><tr><th data-i18n="wlCode">Code</th><th data-i18n="wlName">Name</th><th data-i18n="wlPrice">Price</th><th data-i18n="divYield">Dividend yield</th><th data-i18n="wlDate">As of</th><th></th></tr></thead>
+        <tbody id="wlBody"></tbody>
+      </table>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -349,7 +383,11 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       barTxt: "{0}: {1}", barYld: ", {0} of avg price {1}", tipAvg: " ÷ avg price ", tipYld: " yield", listSep: ", ",
       twse: "TWSE", tpex: "TPEx",
       split: "Split", splitTip: "Share basis changed: {0}. Earlier prices and dividends are scaled to today's shares.",
-      splitEv: "{0} {1} (×{2})", "面額變更": "par value change", "分割": "split", "反分割": "reverse split"
+      splitEv: "{0} {1} (×{2})", "面額變更": "par value change", "分割": "split", "反分割": "reverse split",
+      tabWatch: "Watchlist", wlExport: "Export JSON", wlImport: "Import JSON", wlEmpty: "Stocks you look up are added here automatically. Click a row to open its details.",
+      wlCode: "Code", wlName: "Name", wlPrice: "Price", wlDate: "As of", wlCount: "{0} stock{1} · click a row to open its details", wlRemove: "Remove {0}",
+      wlImported: "Imported {0} new, {1} already in the list.", wlBadFile: "Couldn't read that file: {0}", wlNoStocks: "no TW stock codes found",
+      wlSaved: "Saved {0}.", wlSaveFail: "Export failed: {0}"
     },
     zh: {
       title: "加碼殖利率計算機", sub: "已填入範例數字，請換成你自己的。",
@@ -395,7 +433,11 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       barTxt: "{0}：{1}", barYld: "，為均價 {1} 的 {0}", tipAvg: " ÷ 均價 ", tipYld: " 殖利率", listSep: "、",
       twse: "上市", tpex: "上櫃",
       split: "曾分割", splitTip: "股本基礎曾變動：{0}。之前的股價與股利已換算成目前的股數。",
-      splitEv: "{0} {1}（×{2}）", "面額變更": "面額變更", "分割": "分割", "反分割": "反分割"
+      splitEv: "{0} {1}（×{2}）", "面額變更": "面額變更", "分割": "分割", "反分割": "反分割",
+      tabWatch: "追蹤清單", wlExport: "匯出 JSON", wlImport: "匯入 JSON", wlEmpty: "查詢過的股票會自動加入這裡。點選一列即可查看個股資訊。",
+      wlCode: "代號", wlName: "名稱", wlPrice: "股價", wlDate: "資料日期", wlCount: "共 {0} 檔 · 點選一列查看個股資訊", wlRemove: "移除 {0}",
+      wlImported: "已匯入 {0} 檔新股票，{1} 檔已在清單中。", wlBadFile: "無法讀取這個檔案：{0}", wlNoStocks: "找不到台股代號",
+      wlSaved: "已儲存 {0}。", wlSaveFail: "匯出失敗：{0}"
     }
   };
   let lang;
@@ -555,8 +597,8 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     renderTarget();
   });
 
-  // tabs; #recommended / #detail deep-link to a tab
-  const tabs = ["buyin", "recommended", "detail"];
+  // tabs; #recommended / #detail / #watch deep-link to a tab
+  const tabs = ["buyin", "recommended", "detail", "watch"];
   function show(name) {
     tabs.forEach(t => {
       $("tab-" + t).setAttribute("aria-selected", t === name);
@@ -744,6 +786,75 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       t("rangeNow", pct((r.hi.max - r.close) / r.hi.max), pct((r.close - r.lo.min) / r.lo.min));
   }
 
+  // watchlist: every successful lookup is saved here (localStorage), exportable as JSON
+  const CODE_RE = /^[0-9A-Z]{4,6}$/;
+  let watch = [];
+  try { watch = JSON.parse(localStorage.getItem("watchlist") || "[]").filter(x => x && CODE_RE.test(x.code)); } catch (e) { watch = []; }
+  const saveWatch = () => { try { localStorage.setItem("watchlist", JSON.stringify(watch)); } catch (e) {} };
+  let wlMsg = null; // { key, args, bad }
+  function renderWatch() {
+    $("wlEmpty").hidden = watch.length > 0; $("wlWrap").hidden = watch.length === 0;
+    $("wlCount").textContent = watch.length ? t("wlCount", watch.length, plural(watch.length)) : "";
+    $("wlExport").disabled = !watch.length;
+    const m = $("wlMsg"); m.hidden = !wlMsg;
+    if (wlMsg) { m.textContent = t(wlMsg.key, ...wlMsg.args); m.className = "wl-msg" + (wlMsg.bad ? " no" : ""); }
+    $("wlBody").replaceChildren(...watch.map(w => {
+      const tr = document.createElement("tr"), td = x => { const c = document.createElement("td"); c.append(x); tr.append(c); return c; };
+      const open = document.createElement("button"); open.type = "button"; open.className = "open"; open.textContent = w.code;
+      td(open); td(w.name || ""); td(w.close != null ? money(w.close) : "–"); td(w.yield != null ? pct(w.yield) : "–"); td(w.date || "");
+      const rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×"; rm.setAttribute("aria-label", t("wlRemove", w.code));
+      rm.addEventListener("click", e => { e.stopPropagation(); watch = watch.filter(x => x.code !== w.code); saveWatch(); wlMsg = null; renderWatch(); });
+      td(rm);
+      tr.addEventListener("click", () => { $("q").value = w.code; show("detail"); $("fq").requestSubmit(); });
+      return tr;
+    }));
+  }
+  function addWatch(r) {
+    const d = +r.div.toFixed(3);
+    const row = { code: r.code, name: r.name || "", close: r.close, yield: r.close > 0 ? +(d / r.close).toFixed(6) : null, date: r.date };
+    const i = watch.findIndex(x => x.code === r.code);
+    if (i >= 0) watch[i] = { ...watch[i], ...row }; else watch.unshift(row);
+    saveWatch(); renderWatch();
+  }
+  $("wlExport").addEventListener("click", async () => {
+    const filename = "tw-watchlist-" + iso(new Date()) + ".json";
+    const data = JSON.stringify({ app: "buy-in-yield-calculator", version: 1, exported: new Date().toISOString(), stocks: watch }, null, 2);
+    try {
+      // inside claude.ai the page must ask the viewer to save; on a normal site a link download works
+      const dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
+      if (dl) await dl.save({ filename, data });
+      else {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); a.download = filename;
+        document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+      wlMsg = { key: "wlSaved", args: [filename] };
+    } catch (err) {
+      wlMsg = err && err.code === "declined" ? null : { key: "wlSaveFail", args: [(err && (err.message || err.code)) || "?"], bad: true };
+    }
+    renderWatch();
+  });
+  $("wlFile").addEventListener("change", async e => {
+    const file = e.target.files[0]; e.target.value = "";
+    if (!file) return;
+    try {
+      const j = JSON.parse(await file.text());
+      const list = (Array.isArray(j) ? j : j && j.stocks) || [];
+      // accept rows as objects or bare codes; keep only valid TW codes, dedupe against the list
+      const rows = list.map(x => typeof x === "string" ? { code: x } : x)
+        .filter(x => x && typeof x.code === "string" && CODE_RE.test(x.code.trim().toUpperCase()))
+        .map(x => ({ code: x.code.trim().toUpperCase(), name: typeof x.name === "string" ? x.name : "",
+          close: isFinite(x.close) ? +x.close : null, yield: isFinite(x.yield) ? +x.yield : null, date: typeof x.date === "string" ? x.date : "" }));
+      if (!rows.length) throw new Error(t("wlNoStocks"));
+      let added = 0, dup = 0;
+      rows.forEach(x => { if (watch.some(w => w.code === x.code)) dup++; else { watch.push(x); added++; } });
+      saveWatch(); wlMsg = { key: "wlImported", args: [added, dup] };
+    } catch (err) {
+      wlMsg = { key: "wlBadFile", args: [err.message], bad: true };
+    }
+    renderWatch();
+  });
+
   // ticker status line; kept as state so a language switch can redraw it
   let tick = { kind: "intro" };
   function renderTick() {
@@ -772,7 +883,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       $("d").value = $("d2").value = d;
       lastR = r;
       render(); renderTarget(); renderDetail(r);
-      tick = { kind: "ok", r }; renderTick();
+      tick = { kind: "ok", r }; renderTick(); addWatch(r);
       try { localStorage.setItem("ticker", code); } catch (e) {}
     } catch (err) {
       tick = { kind: "fail", msg: err.message }; renderTick();
@@ -783,7 +894,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   // redraw everything in the chosen language
   function renderAll() {
     applyStatic();
-    render(); renderTarget(); renderMax(); renderTick();
+    render(); renderTarget(); renderMax(); renderTick(); renderWatch();
     if (lastR) renderDetail(lastR);
   }
   document.querySelectorAll("[data-lang]").forEach(el => el.addEventListener("click", () => {
