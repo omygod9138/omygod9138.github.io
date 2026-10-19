@@ -96,6 +96,10 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .det { display: grid; gap: 20px; }
 .det-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; }
 .det-name { font: 600 20px var(--f-body); }
+.split { display: inline-flex; align-items: center; gap: 4px; font: 600 12px var(--f-body); color: var(--mark-buy); background: none; border: 1px solid currentColor; border-radius: 999px; padding: 2px 8px; cursor: pointer; align-self: center; }
+.split svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.split:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.split-n { margin: -12px 0 0; font-size: 13px; color: var(--muted); }
 .det-sub { color: var(--muted); font-size: 13px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .kpis .y { align-content: start; }
@@ -263,7 +267,8 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   <section class="panel" id="pane-detail" role="tabpanel" aria-labelledby="tab-detail" aria-live="polite" hidden>
     <p class="det-empty" id="detEmpty" data-i18n="detEmpty">Enter a TW stock or ETF code above and press the button to see its details here.</p>
     <div class="det" id="det" hidden>
-      <div class="det-head"><span class="det-name" id="dName"></span><span class="det-sub" id="dSub"></span></div>
+      <div class="det-head"><span class="det-name" id="dName"></span><button type="button" class="split" id="dSplit" aria-expanded="false" hidden><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span id="dSplitT"></span></button><span class="det-sub" id="dSub"></span></div>
+      <p class="split-n" id="dSplitN" hidden></p>
       <div class="kpis">
         <div class="y main"><span class="lbl" data-i18n="curPrice">Current price</span><span class="v" id="dPx"></span><span class="d" id="dPxD"></span></div>
         <div class="y"><span class="lbl" id="dTgtL"></span>
@@ -342,7 +347,9 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       tipIntro: "Hover or tap a bar for the year's total. Labels show that year's dividend ÷ its average closing price.",
       soFar: " (so far)", soFarShort: " so far", divAvgAria: "Cash dividend and yield on that year's average price, {0} to {1}",
       barTxt: "{0}: {1}", barYld: ", {0} of avg price {1}", tipAvg: " ÷ avg price ", tipYld: " yield", listSep: ", ",
-      twse: "TWSE", tpex: "TPEx"
+      twse: "TWSE", tpex: "TPEx",
+      split: "Split", splitTip: "Share basis changed: {0}. Earlier prices and dividends are scaled to today's shares.",
+      splitEv: "{0} {1} (×{2})", "面額變更": "par value change", "分割": "split", "反分割": "reverse split"
     },
     zh: {
       title: "加碼殖利率計算機", sub: "已填入範例數字，請換成你自己的。",
@@ -386,7 +393,9 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       tipIntro: "將游標移到或點選長條，查看當年合計。標籤為當年股利 ÷ 當年平均收盤價。",
       soFar: "（至今）", soFarShort: " 至今", divAvgAria: "每年現金股利與以當年均價計算的殖利率，{0} 至 {1}",
       barTxt: "{0}：{1}", barYld: "，為均價 {1} 的 {0}", tipAvg: " ÷ 均價 ", tipYld: " 殖利率", listSep: "、",
-      twse: "上市", tpex: "上櫃"
+      twse: "上市", tpex: "上櫃",
+      split: "曾分割", splitTip: "股本基礎曾變動：{0}。之前的股價與股利已換算成目前的股數。",
+      splitEv: "{0} {1}（×{2}）", "面額變更": "面額變更", "分割": "分割", "反分割": "反分割"
     }
   };
   let lang;
@@ -596,7 +605,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     ]);
     // par value changes (e.g. NT$10 -> NT$1) and splits change the share; scale earlier prices and dividends to today's share
     const pars = pv.filter(x => x.before_price > 0 && x.after_price > 0)
-      .map(x => ({ date: x.date, k: +(x.after_price / x.before_price).toFixed(4) }));
+      .map(x => ({ date: x.date, type: x.type, k: +(x.after_price / x.before_price).toFixed(4) }));
     const adj = date => pars.reduce((f, p) => date < p.date ? f * p.k : f, 1);
     const days = px.filter(x => x.close > 0).map(x => { const f = adj(x.date); return f === 1 ? x : { ...x, close: x.close * f, max: x.max * f, min: x.min * f }; });
     const last = days[days.length - 1];
@@ -644,6 +653,15 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     $("detEmpty").hidden = true; $("det").hidden = false;
     $("dName").textContent = (r.name ? r.name + " " : "") + r.code;
     $("dSub").textContent = [r.type === "tpex" || r.type === "twse" ? t(r.type) : r.type, r.industry].filter(Boolean).join(" · ");
+    // icon when the share basis changed (par value change, split, reverse split); click shows the list on touch screens
+    const sp = $("dSplit"), spN = $("dSplitN");
+    sp.hidden = !r.pars.length;
+    if (r.pars.length) {
+      const tip = t("splitTip", r.pars.map(p => t("splitEv", p.date, t(p.type || "分割"), p.k)).join(t("listSep")));
+      $("dSplitT").textContent = t("split");
+      sp.title = tip; sp.setAttribute("aria-label", tip); spN.textContent = tip;
+      sp.onclick = () => { spN.hidden = !spN.hidden; sp.setAttribute("aria-expanded", !spN.hidden); };
+    } else { spN.hidden = true; }
     $("dPx").textContent = money(r.close);
     const ch = r.close - r.prev;
     $("dPxD").textContent = signed(ch, money) + " (" + signed(r.prev ? ch / r.prev * 100 : 0, x => x.toFixed(2)) + "%)" + t("closeOn") + r.date;
