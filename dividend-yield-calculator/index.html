@@ -115,6 +115,10 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .wl .open { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .wl .rm { font: 600 14px var(--f-body); color: var(--muted); background: none; border: 1px solid transparent; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; }
 .wl .rm:hover { color: var(--up); border-color: var(--line); }
+.budget { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 14px; align-items: start; margin-top: 10px; }
+@media (max-width: 640px) { .budget { grid-template-columns: minmax(0, 1fr); } }
+.kpis.bud-out { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.bud-out .y .v { font-size: 20px; }
 .det-sub { color: var(--muted); font-size: 13px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .kpis .y { align-content: start; }
@@ -295,6 +299,18 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
         <div class="y"><span class="lbl" data-i18n="avgAnn">Avg annual dividend</span><span class="v" id="dAvg"></span><span class="note" id="dAvgN"></span></div>
       </div>
       <div>
+        <h2 data-i18n="budgetH">What your budget buys</h2>
+        <div class="budget">
+          <label for="bud"><span data-i18n="budget">Budget (NT$)</span><input id="bud" type="number" inputmode="decimal" min="0" step="any" placeholder="100000"></label>
+          <div class="kpis bud-out">
+            <div class="y main"><span class="lbl" data-i18n="budShares">Shares you can buy</span><span class="v" id="bSh">–</span><span class="note" id="bShN"></span></div>
+            <div class="y"><span class="lbl" data-i18n="budCost">Total cost</span><span class="v" id="bCost">–</span><span class="note" id="bCostN"></span></div>
+            <div class="y"><span class="lbl" data-i18n="budLeft">Left over</span><span class="v" id="bLeft">–</span><span class="note" id="bLeftN"></span></div>
+            <div class="y"><span class="lbl" data-i18n="budDiv">Expected annual dividend</span><span class="v" id="bDiv">–</span><span class="note" id="bDivN"></span></div>
+          </div>
+        </div>
+      </div>
+      <div>
         <h2 data-i18n="range">All-time price range</h2>
         <div class="range" aria-hidden="true">
           <div class="track"></div>
@@ -387,7 +403,11 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       tabWatch: "Watchlist", wlExport: "Export JSON", wlImport: "Import JSON", wlEmpty: "Stocks you look up are added here automatically. Click a row to open its details.",
       wlCode: "Code", wlName: "Name", wlPrice: "Price", wlDate: "As of", wlCount: "{0} stock{1} · click a row to open its details", wlRemove: "Remove {0}",
       wlImported: "Imported {0} new, {1} already in the list.", wlBadFile: "Couldn't read that file: {0}", wlNoStocks: "no TW stock codes found",
-      wlSaved: "Saved {0}.", wlSaveFail: "Export failed: {0}"
+      wlSaved: "Saved {0}.", wlSaveFail: "Export failed: {0}",
+      budgetH: "What your budget buys", budget: "Budget (NT$)", budShares: "Shares you can buy", budCost: "Total cost", budLeft: "Left over", budDiv: "Expected annual dividend",
+      budLots: "{0} lot{1} + {2} odd shares", budLotsOnly: "{0} lot{1} (1 lot = 1,000 shares)", budOdd: "{0} odd shares (under 1 lot)",
+      budCostN: "Shares {0} + fee {1} (0.1425%, min NT$20)", budLeftN: "{0} of your budget", budDivN: "Last 12 months' dividend × shares · {0} yield on cost",
+      budEnter: "Enter a budget", budTooSmall: "Not enough for 1 share incl. fee"
     },
     zh: {
       title: "加碼殖利率計算機", sub: "已填入範例數字，請換成你自己的。",
@@ -437,7 +457,11 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       tabWatch: "追蹤清單", wlExport: "匯出 JSON", wlImport: "匯入 JSON", wlEmpty: "查詢過的股票會自動加入這裡。點選一列即可查看個股資訊。",
       wlCode: "代號", wlName: "名稱", wlPrice: "股價", wlDate: "資料日期", wlCount: "共 {0} 檔 · 點選一列查看個股資訊", wlRemove: "移除 {0}",
       wlImported: "已匯入 {0} 檔新股票，{1} 檔已在清單中。", wlBadFile: "無法讀取這個檔案：{0}", wlNoStocks: "找不到台股代號",
-      wlSaved: "已儲存 {0}。", wlSaveFail: "匯出失敗：{0}"
+      wlSaved: "已儲存 {0}。", wlSaveFail: "匯出失敗：{0}",
+      budgetH: "預算可以買多少", budget: "預算（新台幣）", budShares: "可買股數", budCost: "總成本", budLeft: "剩餘金額", budDiv: "預估年股利",
+      budLots: "{0} 張 + {2} 股零股", budLotsOnly: "{0} 張（1 張 = 1,000 股）", budOdd: "{0} 股零股（不到 1 張）",
+      budCostN: "股款 {0} + 手續費 {1}（0.1425%，最低 20 元）", budLeftN: "預算的 {0}", budDivN: "近 12 個月股利 × 股數 · 成本殖利率 {0}",
+      budEnter: "請輸入預算", budTooSmall: "預算不足以買 1 股（含手續費）"
     }
   };
   let lang;
@@ -712,7 +736,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     $("dYldN").textContent = t("yldN", money(d), r.n, plural(r.n));
 
     detail = { d, close: r.close };
-    renderMax();
+    renderMax(); renderBudget();
 
     // P/E as published by the exchange; 0 means trailing earnings are negative, none for ETFs
     const pe = r.per;
@@ -785,6 +809,29 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       (r.pars.length ? t("rangeAdj", r.pars.map(p => p.date + " (×" + p.k + ")").join(t("listSep"))) : "") +
       t("rangeNow", pct((r.hi.max - r.close) / r.hi.max), pct((r.close - r.lo.min) / r.lo.min));
   }
+
+  // budget -> shares at the current price, after TW broker fee (0.1425%, min NT$20)
+  const FEE = 0.001425, FEE_MIN = 20;
+  const fee = amt => Math.max(FEE_MIN, Math.round(amt * FEE));
+  try { $("bud").value = localStorage.getItem("budget") || ""; } catch (e) {}
+  function renderBudget() {
+    const out = ["bSh", "bCost", "bLeft", "bDiv"], notes = ["bShN", "bCostN", "bLeftN", "bDivN"];
+    const B = parseFloat($("bud").value);
+    const clear = msg => { out.forEach(id => $(id).textContent = "–"); notes.forEach(id => $(id).textContent = ""); $("bShN").textContent = msg; };
+    if (!detail) return clear("");
+    if (!(B > 0)) return clear(t("budEnter"));
+    const { close: price, d } = detail;
+    let n = Math.floor(B / (price * (1 + FEE)));
+    while (n > 0 && n * price + fee(n * price) > B) n--;   // min fee can push the last share over budget
+    if (n <= 0) return clear(t("budTooSmall"));
+    const amt = n * price, f = fee(amt), cost = amt + f, lots = Math.floor(n / 1000), odd = n % 1000;
+    $("bSh").textContent = num(n);
+    $("bShN").textContent = lots ? (odd ? t("budLots", num(lots), plural(lots), num(odd)) : t("budLotsOnly", num(lots), plural(lots))) : t("budOdd", num(odd));
+    $("bCost").textContent = money(cost); $("bCostN").textContent = t("budCostN", money(amt), money(f));
+    $("bLeft").textContent = money(B - cost); $("bLeftN").textContent = t("budLeftN", pct((B - cost) / B));
+    $("bDiv").textContent = money(+(n * d).toFixed(2)); $("bDivN").textContent = t("budDivN", pct(d * n / cost));
+  }
+  $("bud").addEventListener("input", () => { try { localStorage.setItem("budget", $("bud").value); } catch (e) {} renderBudget(); });
 
   // watchlist: every successful lookup is saved here (localStorage), exportable as JSON
   const CODE_RE = /^[0-9A-Z]{4,6}$/;
