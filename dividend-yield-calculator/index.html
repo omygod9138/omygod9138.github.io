@@ -453,12 +453,13 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   const FM = "https://api.finmindtrade.com/api/v4/data?";
   const iso = d => d.toISOString().slice(0, 10);
   async function fm(dataset, id, start) {
-    const r = await fetch(FM + new URLSearchParams({ dataset, data_id: id, start_date: start }));
+    const q = { dataset, start_date: start }; if (id) q.data_id = id;
+    const r = await fetch(FM + new URLSearchParams(q));
     const j = await r.json().catch(() => ({}));
     if (!r.ok || j.status !== 200) throw new Error(j.msg || "HTTP " + r.status);
     return j.data;
   }
-  // mean daily close per calendar year (raw prices, same basis as raw dividends)
+  // mean daily close per calendar year (par-adjusted prices, same basis as adjusted dividends)
   function avgCloseByYear(days) {
     const acc = {};
     days.forEach(x => { const y = +x.date.slice(0, 4); (acc[y] = acc[y] || [0, 0])[0] += x.close; acc[y][1]++; });
@@ -467,18 +468,23 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
   }
 
   async function lookup(code) {
-    const [info, px, dv, per] = await Promise.all([
+    const [info, px, dv, per, pv] = await Promise.all([
       fm("TaiwanStockInfo", code, "1990-01-01").catch(() => []),
       fm("TaiwanStockPrice", code, "1990-01-01"),   // full daily history: current price + all-time high/low
       fm("TaiwanStockDividend", code, "1990-01-01"), // full dividend history: yield, years paid, averages
-      fm("TaiwanStockPER", code, iso(new Date(Date.now() - 30 * 864e5))).catch(() => []) // exchange-published P/E, P/B
+      fm("TaiwanStockPER", code, iso(new Date(Date.now() - 30 * 864e5))).catch(() => []), // exchange-published P/E, P/B
+      fm("TaiwanStockParValueChange", "", "1990-01-01").catch(() => []) // all par changes (no per-stock filter)
     ]);
-    const days = px.filter(x => x.close > 0);
+    // par value changes (e.g. NT$10 -> NT$2.5) split shares; scale earlier prices and dividends to today's share
+    const pars = pv.filter(x => x.stock_id === code && x.before_close > 0 && x.after_ref_close > 0)
+      .map(x => ({ date: x.date, k: +(x.after_ref_close / x.before_close).toFixed(4) }));
+    const adj = date => pars.reduce((f, p) => date < p.date ? f * p.k : f, 1);
+    const days = px.filter(x => x.close > 0).map(x => { const f = adj(x.date); return f === 1 ? x : { ...x, close: x.close * f, max: x.max * f, min: x.min * f }; });
     const last = days[days.length - 1];
     if (!last) throw new Error("no price data for " + code);
     const today = iso(new Date()), yearAgo = iso(new Date(Date.now() - 365 * 864e5));
     // cash payouts, dated by ex-dividend day
-    const pays = dv.map(x => ({ ex: x.CashExDividendTradingDate || x.date, cash: (x.CashEarningsDistribution || 0) + (x.CashStatutorySurplus || 0) }))
+    const pays = dv.map(x => { const ex = x.CashExDividendTradingDate || x.date; return { ex, cash: ((x.CashEarningsDistribution || 0) + (x.CashStatutorySurplus || 0)) * adj(ex) }; })
       .filter(x => x.cash > 0 && x.ex <= today);
     const ttm = pays.filter(x => x.ex >= yearAgo);
     let hi = days[0], lo = days[0];
@@ -486,7 +492,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     return {
       code, name: info[0] && info[0].stock_name, type: info[0] && info[0].type, industry: info[0] && info[0].industry_category,
       close: last.close, date: last.date, prev: days.length > 1 ? days[days.length - 2].close : last.close, since: days[0].date,
-      div: ttm.reduce((a, b) => a + b.cash, 0), n: ttm.length, pays, hi, lo, per: per[per.length - 1], avgClose: avgCloseByYear(days)
+      div: ttm.reduce((a, b) => a + b.cash, 0), n: ttm.length, pays, hi, lo, per: per[per.length - 1], avgClose: avgCloseByYear(days), pars
     };
   }
 
@@ -596,7 +602,8 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     $("dNowV").style.transform = "translateX(" + (at > 80 ? "-100%" : at < 20 ? "0" : "-50%") + ")";
     $("dNowV").style.left = at > 80 ? "100%" : at < 20 ? "0" : "50%";
     $("dNowV").textContent = "now " + money(r.close);
-    $("dRangeN").textContent = "Daily high/low since " + r.since + ", not adjusted for dividends or splits. Now " +
+    $("dRangeN").textContent = "Daily high/low since " + r.since + ", not adjusted for dividends. " +
+      (r.pars.length ? "Prices and dividends before " + r.pars.map(p => p.date + " (×" + p.k + ")").join(", ") + " are scaled for par value changes. " : "") + "Now " +
       pct((r.hi.max - r.close) / r.hi.max) + " below the high, " + pct((r.close - r.lo.min) / r.lo.min) + " above the low.";
   }
 
