@@ -117,9 +117,11 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .hist-head .lbl { flex-basis: 100%; }
 .hist-v { font: 600 24px var(--f-mono); font-variant-numeric: tabular-nums; }
 .hist-head .note { font-size: 13px; color: var(--muted); }
-.bars { display: flex; align-items: flex-end; gap: 2px; height: 140px; margin-top: 12px; border-bottom: 1px solid var(--line); position: relative; }
+.bars { display: flex; align-items: flex-end; gap: 2px; height: 140px; padding-top: 20px; margin-top: 12px; border-bottom: 1px solid var(--line); position: relative; }
 .bar { flex: 1 1 0; min-width: 0; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; }
 .bar.partial { opacity: .4; }
+.bar .yl { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 3px; font: 500 10.5px var(--f-mono); color: var(--muted); white-space: nowrap; pointer-events: none; }
+.bars.dense .bar .yl { display: none; }
 .bar:hover, .bar:focus-visible { outline: 2px solid var(--fg); outline-offset: 1px; }
 .bars-x { display: flex; justify-content: space-between; font: 500 11px var(--f-mono); color: var(--muted); margin-top: 4px; }
 .bar-tip { min-height: 20px; font-size: 13px; color: var(--muted); margin: 6px 0 0; }
@@ -274,7 +276,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
         <div class="hist-head"><span class="lbl">Paying dividends for</span><span class="hist-v" id="dYrs"></span><span class="note" id="dYrsN"></span></div>
         <div class="bars" id="dBars" role="img"></div>
         <div class="bars-x"><span id="dX0"></span><span id="dX1"></span></div>
-        <p class="bar-tip" id="dTip">Hover or tap a bar for the year's total.</p>
+        <p class="bar-tip" id="dTip">Hover or tap a bar for the year's total. Labels show that year's dividend ÷ its average closing price.</p>
       </div>
     </div>
   </section>
@@ -456,6 +458,14 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     if (!r.ok || j.status !== 200) throw new Error(j.msg || "HTTP " + r.status);
     return j.data;
   }
+  // mean daily close per calendar year (raw prices, same basis as raw dividends)
+  function avgCloseByYear(days) {
+    const acc = {};
+    days.forEach(x => { const y = +x.date.slice(0, 4); (acc[y] = acc[y] || [0, 0])[0] += x.close; acc[y][1]++; });
+    const out = {}; for (const y in acc) out[y] = acc[y][0] / acc[y][1];
+    return out;
+  }
+
   async function lookup(code) {
     const [info, px, dv, per] = await Promise.all([
       fm("TaiwanStockInfo", code, "1990-01-01").catch(() => []),
@@ -476,7 +486,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     return {
       code, name: info[0] && info[0].stock_name, type: info[0] && info[0].type, industry: info[0] && info[0].industry_category,
       close: last.close, date: last.date, prev: days.length > 1 ? days[days.length - 2].close : last.close, since: days[0].date,
-      div: ttm.reduce((a, b) => a + b.cash, 0), n: ttm.length, pays, hi, lo, per: per[per.length - 1]
+      div: ttm.reduce((a, b) => a + b.cash, 0), n: ttm.length, pays, hi, lo, per: per[per.length - 1], avgClose: avgCloseByYear(days)
     };
   }
 
@@ -551,19 +561,29 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       const all = []; for (let y = first; y <= thisYear; y++) all.push(y);
       const max = Math.max(...all.map(y => byYear[y] || 0));
       const tip = $("dTip");
-      $("dBars").setAttribute("aria-label", "Cash dividend per year, " + first + " to " + thisYear);
+      $("dBars").setAttribute("aria-label", "Cash dividend and yield on that year's average price, " + first + " to " + thisYear);
       $("dBars").replaceChildren(...all.map(y => {
         const v = byYear[y] || 0, el = document.createElement("div");
         el.className = "bar" + (y === thisYear ? " partial" : "");
         el.style.height = (v / max * 100) + "%";
         el.tabIndex = 0;
-        const txt = y + ": " + (v ? money(+v.toFixed(3)) : "none") + (y === thisYear ? " (so far)" : "");
+        // yield on that year's average close
+        const ac = r.avgClose[y], yl = v && ac ? v / ac : 0;
+        if (yl) { const l = document.createElement("span"); l.className = "yl"; l.textContent = (yl * 100).toFixed(1) + "%"; el.append(l); }
+        const txt = y + ": " + (v ? money(+v.toFixed(3)) : "none") + (y === thisYear ? " (so far)" : "") + (yl ? ", " + pct(yl) + " of avg price " + money(+ac.toFixed(2)) : "");
         el.title = txt; el.setAttribute("aria-label", txt);
-        const showTip = () => { tip.replaceChildren(y + (y === thisYear ? " so far" : "") + ": "); const b = document.createElement("b"); b.textContent = v ? money(+v.toFixed(3)) : "none"; tip.append(b); };
+        const showTip = () => {
+          const b = t => { const x = document.createElement("b"); x.textContent = t; return x; };
+          tip.replaceChildren(y + (y === thisYear ? " so far" : "") + ": ", b(v ? money(+v.toFixed(3)) : "none"));
+          if (yl) tip.append(" ÷ avg price ", b(money(+ac.toFixed(2))), " = ", b(pct(yl)), " yield");
+        };
         el.addEventListener("mouseenter", showTip); el.addEventListener("focus", showTip); el.addEventListener("click", showTip);
         return el;
       }));
       $("dX0").textContent = first; $("dX1").textContent = thisYear + " (so far)";
+      // labels need ~30px per bar; on narrow screens rely on the tooltip
+      const fit = () => $("dBars").classList.toggle("dense", $("dBars").clientWidth / all.length < 30);
+      fit(); window.onresize = fit;
     }
 
     // all-time range (daily high/low, not adjusted for dividends or splits)
