@@ -68,6 +68,13 @@ td:first-child { font-family: var(--f-body); color: var(--muted); }
 .y .v { font: 600 22px var(--f-mono); font-variant-numeric: tabular-nums; }
 .y .d { font: 500 12px var(--f-mono); }
 .err { color: var(--up); font-size: 13px; margin: 8px 0 0; }
+.rec { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+@media (max-width: 480px) { .rec { grid-template-columns: minmax(0, 1fr); } }
+.rec .y .v { font-size: 20px; }
+.rec .note { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.target { margin-top: 6px; font-size: 13px; color: var(--muted); }
+.target b { font-family: var(--f-mono); color: var(--fg); font-weight: 600; }
+.ok { color: var(--down); } .no { color: var(--up); }
 h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 22px 0 0; font-weight: 600; }
 </style>
 </head>
@@ -100,6 +107,11 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
         <label for="d">Annual dividend per share<input id="d" type="number" inputmode="decimal" min="0" step="any" value="2"></label>
         <p class="hint">Quarterly payer? Enter the quarterly amount × 4.</p>
       </fieldset>
+      <fieldset>
+        <legend>Target</legend>
+        <label for="t">Target dividend yield (%)<input id="t" type="number" inputmode="decimal" min="0" step="any" value="4.5"></label>
+        <p class="hint">Used for the recommended prices.</p>
+      </fieldset>
       <p class="err" id="err" hidden></p>
     </form>
 
@@ -122,6 +134,14 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
         <div class="y"><span class="lbl">On old avg</span><span class="v" id="yOld">–</span><span class="d flat">&nbsp;</span></div>
         <div class="y main"><span class="lbl">On new avg</span><span class="v" id="yNew">–</span><span class="d" id="yDelta">–</span></div>
         <div class="y"><span class="lbl">At buy price</span><span class="v" id="yBuy">–</span><span class="d flat">yield on this lot</span></div>
+      </div>
+
+      <h2>Recommended price for <span id="rT">–</span> yield</h2>
+      <p class="target">To earn this yield, your avg price must be at most <b id="rAvg">–</b>.</p>
+      <div class="rec">
+        <div class="y main"><span class="lbl">Max buy price</span><span class="v" id="rMax">–</span><span class="d" id="rMaxD">–</span><span class="note">This lot alone hits the target yield at or below this price.</span></div>
+        <div class="y"><span class="lbl">Buy price for new avg</span><span class="v" id="rNeed">–</span><span class="d" id="rNeedD">&nbsp;</span><span class="note" id="rNeedN">Buying your planned shares at or below this brings your whole position to the target.</span></div>
+        <div class="y"><span class="lbl">Shares needed</span><span class="v" id="rSh">–</span><span class="d" id="rShD">&nbsp;</span><span class="note" id="rShN">Shares to buy at your buy price so your whole position reaches the target.</span></div>
       </div>
 
       <div class="tbl">
@@ -211,9 +231,62 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       if (y === x) c.classList.add("flat");
     });
     cls($("t2c"), r.dAvg);
+
+    renderTarget(s, a, b, p, d);
   }
 
-  ids.forEach(id => $(id).addEventListener("input", render));
+  // pure calc: prices/shares needed for a target yield (ty as fraction)
+  function target(s, a, b, p, d, ty) {
+    const avgT = d / ty;                                      // max avg price for target yield
+    const maxBuy = avgT;                                      // a single lot hits target at or below this
+    const needBuy = b > 0 ? (avgT * (s + b) - s * a) / b : NaN; // buy price so new avg = avgT
+    let shares;                                               // shares at price p so new avg = avgT
+    if (a <= avgT) shares = 0;
+    else if (p >= avgT) shares = Infinity;
+    else shares = s * (a - avgT) / (avgT - p);
+    return { avgT, maxBuy, needBuy, shares };
+  }
+
+  function renderTarget(s, a, b, p, d) {
+    const tv = parseFloat($("t").value);
+    const ids2 = ["rAvg", "rMax", "rMaxD", "rNeed", "rNeedD", "rSh", "rShD"];
+    if (!isFinite(tv) || tv <= 0 || d <= 0) {
+      ids2.forEach(id => $(id).textContent = "–");
+      $("rT").textContent = "–";
+      $("rMaxD").textContent = d <= 0 ? "Enter a dividend above 0" : "Enter a target above 0";
+      return;
+    }
+    const r = target(s, a, b, p, d, tv / 100);
+    const mark = (el, good, txt) => { el.textContent = txt; el.classList.remove("ok", "no", "flat"); el.classList.add(good ? "ok" : "no"); };
+    $("rT").textContent = tv + "%";
+    $("rAvg").textContent = money(r.avgT);
+    $("rMax").textContent = money(r.maxBuy);
+    mark($("rMaxD"), p <= r.maxBuy, p <= r.maxBuy ? "✓ your buy price fits" : "✗ your buy price is " + money(p - r.maxBuy) + " too high");
+
+    if (a <= r.avgT) {
+      mark($("rNeedD"), true, "✓ already at target");
+      $("rNeed").textContent = b > 0 ? "≤ " + money(r.needBuy) : "Any price";
+    } else if (b <= 0) {
+      $("rNeed").textContent = "–";
+      $("rNeedD").textContent = "Enter planned shares"; $("rNeedD").className = "d flat";
+    } else if (r.needBuy <= 0) {
+      $("rNeed").textContent = "Not reachable";
+      mark($("rNeedD"), false, "✗ buy more shares");
+    } else {
+      $("rNeed").textContent = money(r.needBuy);
+      mark($("rNeedD"), p <= r.needBuy, p <= r.needBuy ? "✓ your buy price fits" : "✗ " + money(p - r.needBuy) + " above your buy price");
+    }
+
+    if (r.shares === 0) { $("rSh").textContent = "0"; mark($("rShD"), true, "✓ already at target"); }
+    else if (!isFinite(r.shares)) { $("rSh").textContent = "Not reachable"; mark($("rShD"), false, "✗ buy price must be below " + money(r.avgT)); }
+    else {
+      const need = Math.ceil(r.shares - 1e-9);
+      $("rSh").textContent = num(need);
+      mark($("rShD"), b >= need, b >= need ? "✓ your plan covers it" : "✗ " + num(need - b) + " more than planned");
+    }
+  }
+
+  [...ids, "t"].forEach(id => $(id).addEventListener("input", render));
   $("f").addEventListener("submit", e => e.preventDefault());
   render();
 })();
