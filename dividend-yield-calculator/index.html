@@ -274,7 +274,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       mark($("rNeedD"), false, "✗ buy more shares");
     } else {
       $("rNeed").textContent = money(r.needBuy);
-      mark($("rNeedD"), p <= r.needBuy, p <= r.needBuy ? "✓ your buy price fits" : "✗ " + money(p - r.needBuy) + " above your buy price");
+      mark($("rNeedD"), p <= r.needBuy, p <= r.needBuy ? "✓ your buy price fits" : "✗ your buy price is " + money(p - r.needBuy) + " too high");
     }
 
     if (r.shares === 0) { $("rSh").textContent = "0"; mark($("rShD"), true, "✓ already at target"); }
