@@ -107,6 +107,10 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .range .now span { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); font: 600 12px var(--f-mono); color: var(--accent); white-space: nowrap; }
 .range .end { position: absolute; top: 44px; font: 500 12px var(--f-mono); color: var(--muted); white-space: nowrap; }
 .range .end b { color: var(--fg); font-weight: 600; }
+.hist-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: 10px; }
+.hist-head .lbl { flex-basis: 100%; }
+.hist-v { font: 600 24px var(--f-mono); font-variant-numeric: tabular-nums; }
+.hist-head .note { font-size: 13px; color: var(--muted); }
 .bars { display: flex; align-items: flex-end; gap: 2px; height: 140px; margin-top: 12px; border-bottom: 1px solid var(--line); position: relative; }
 .bar { flex: 1 1 0; min-width: 0; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; }
 .bar.partial { opacity: .4; }
@@ -244,7 +248,6 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
         <div class="y main"><span class="lbl">Current price</span><span class="v" id="dPx"></span><span class="d" id="dPxD"></span></div>
         <div class="y"><span class="lbl">Dividend yield</span><span class="v" id="dYld"></span><span class="note" id="dYldN"></span></div>
         <div class="y"><span class="lbl">P/E ratio</span><span class="v" id="dPe"></span><span class="note" id="dPeN"></span></div>
-        <div class="y"><span class="lbl">Paying dividends for</span><span class="v" id="dYrs"></span><span class="note" id="dYrsN"></span></div>
         <div class="y"><span class="lbl">Avg annual dividend</span><span class="v" id="dAvg"></span><span class="note" id="dAvgN"></span></div>
       </div>
       <div>
@@ -258,7 +261,8 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
         <p class="hint" id="dRangeN"></p>
       </div>
       <div>
-        <h2>Cash dividend per year</h2>
+        <h2>Dividend history</h2>
+        <div class="hist-head"><span class="lbl">Paying dividends for</span><span class="hist-v" id="dYrs"></span><span class="note" id="dYrsN"></span></div>
         <div class="bars" id="dBars" role="img"></div>
         <div class="bars-x"><span id="dX0"></span><span id="dX1"></span></div>
         <p class="bar-tip" id="dTip">Hover or tap a bar for the year's total.</p>
