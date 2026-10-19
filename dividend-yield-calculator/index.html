@@ -98,6 +98,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .det-name { font: 600 20px var(--f-body); }
 .det-sub { color: var(--muted); font-size: 13px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.kpis .y { align-content: start; }
 .kpis .y .v { font-size: 24px; }
 .kpis .note { font-size: 12px; color: var(--muted); line-height: 1.4; }
 .range { position: relative; height: 84px; margin: 8px 8px 0; }
@@ -242,6 +243,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
       <div class="kpis">
         <div class="y main"><span class="lbl">Current price</span><span class="v" id="dPx"></span><span class="d" id="dPxD"></span></div>
         <div class="y"><span class="lbl">Dividend yield</span><span class="v" id="dYld"></span><span class="note" id="dYldN"></span></div>
+        <div class="y"><span class="lbl">P/E ratio</span><span class="v" id="dPe"></span><span class="note" id="dPeN"></span></div>
         <div class="y"><span class="lbl">Paying dividends for</span><span class="v" id="dYrs"></span><span class="note" id="dYrsN"></span></div>
         <div class="y"><span class="lbl">Avg annual dividend</span><span class="v" id="dAvg"></span><span class="note" id="dAvgN"></span></div>
       </div>
@@ -442,10 +444,11 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     return j.data;
   }
   async function lookup(code) {
-    const [info, px, dv] = await Promise.all([
+    const [info, px, dv, per] = await Promise.all([
       fm("TaiwanStockInfo", code, "1990-01-01").catch(() => []),
       fm("TaiwanStockPrice", code, "1990-01-01"),   // full daily history: current price + all-time high/low
-      fm("TaiwanStockDividend", code, "1990-01-01") // full dividend history: yield, years paid, averages
+      fm("TaiwanStockDividend", code, "1990-01-01"), // full dividend history: yield, years paid, averages
+      fm("TaiwanStockPER", code, iso(new Date(Date.now() - 30 * 864e5))).catch(() => []) // exchange-published P/E, P/B
     ]);
     const days = px.filter(x => x.close > 0);
     const last = days[days.length - 1];
@@ -460,7 +463,7 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     return {
       code, name: info[0] && info[0].stock_name, type: info[0] && info[0].type, industry: info[0] && info[0].industry_category,
       close: last.close, date: last.date, prev: days.length > 1 ? days[days.length - 2].close : last.close, since: days[0].date,
-      div: ttm.reduce((a, b) => a + b.cash, 0), n: ttm.length, pays, hi, lo
+      div: ttm.reduce((a, b) => a + b.cash, 0), n: ttm.length, pays, hi, lo, per: per[per.length - 1]
     };
   }
 
@@ -475,6 +478,12 @@ h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
     cls($("dPxD"), ch);
     $("dYld").textContent = pct(r.close > 0 ? d / r.close : 0);
     $("dYldN").textContent = money(d) + " cash in the last 12 months (" + r.n + " payout" + (r.n === 1 ? "" : "s") + ") ÷ price";
+
+    // P/E as published by the exchange; 0 means trailing earnings are negative, none for ETFs
+    const pe = r.per;
+    $("dPe").textContent = !pe ? "n/a" : pe.PER > 0 ? pe.PER.toFixed(2) : "n/a";
+    $("dPeN").textContent = !pe ? "Not published for this code (ETFs have none)." :
+      (pe.PER > 0 ? "Price ÷ last 4 quarters' EPS" : "Last 4 quarters' EPS is negative") + " · P/B " + pe.PBR.toFixed(2) + " · " + pe.date;
 
     // annual totals by ex-dividend year
     const byYear = {};
